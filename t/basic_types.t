@@ -8,8 +8,7 @@ use Moose;
 use JSON;
 use DateTime;
 
-
-use Moose::Util::TypeConstraints;
+use MooseX::Attribute::Deflator::Moose;
 use MooseX::Attribute::Deflator;
 
 

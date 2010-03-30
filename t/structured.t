@@ -5,12 +5,15 @@ use warnings;
 package Test;
 
 use Moose;
-use JSON;
 use DateTime;
 
 use MooseX::Types::Moose qw(Str Int HashRef ArrayRef Maybe);
 use MooseX::Types::Structured qw(Dict Tuple Map Optional);
 use MooseX::Types -declare => [qw(Fullname Person StringIntMaybeHashRef MyDT)];
+
+
+use MooseX::Attribute::Deflator::Structured;
+use MooseX::Attribute::Deflator::Moose;
 
 use MooseX::Attribute::Deflator;
 deflate 'DateTime', via { $_->epoch };

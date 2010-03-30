@@ -37,3 +37,58 @@ foreach my $m (qw( deflator inflator)) {
 }
 
 1;
+
+=head1 SYNOPSIS
+
+  package Test;
+
+  use Moose;
+  use DateTime;
+
+  use MooseX::Attribute::Deflator;
+
+  deflate 'DateTime', via { $_->epoch };
+  inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) };
+
+  no MooseX::Attribute::Deflator;
+
+  has now => ( is => 'rw', 
+               isa => 'DateTime', 
+               required => 1, 
+               default => sub { DateTime->now }, 
+               traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+
+  package main;
+  
+  my $obj = Test->new;
+  my $attr = $obj->meta->get_attribute('now');
+  
+  my $deflated = $attr->deflate($obj);
+  # $deflated is now a number
+  
+  my inflated = $attr->inflate($obj, $deflated);
+  # $inflated is now a DateTime object
+  
+  
+
+=head1 METHODS
+
+These two methods work basically the same. They look up the type constraint 
+which is associated with the attribute and try to find an appropriate
+deflator/inflator. If there is no deflator/inflator for the exact type
+constraint, the method will bubble up the type constraint hierarchy
+until it finds one.
+
+=over 4
+
+=item B<< $attr->deflate($instance) >>
+
+Returns the deflated value of the attribute. It does not change the value
+of the attribute.
+
+=item B<< $attr->inflate($instance, $string) >>
+
+Inflates a string C<$string>. This method does not set the value of
+the attribute to the inflated value.
+
+=back

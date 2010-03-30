@@ -1,9 +1,6 @@
 package MooseX::Attribute::Deflator::Registry;
-
+# ABSTRACT: Registry class for attribute deflators
 use Moose;
-use Moose::Util::TypeConstraints;
-my $REGISTRY = Moose::Util::TypeConstraints->get_type_constraint_registry;
-no Moose::Util::TypeConstraints;
 
 has deflators => ( 
 	traits => ['Hash'],
@@ -13,7 +10,8 @@ has deflators => (
     handles    => { 
 		has_deflator => 'get', 
 		get_deflator => 'get', 
-		set_deflator => 'set', 
+		set_deflator => 'set',
+		add_deflator => 'set',
 		find_deflator => 'get'
 	}
 );
@@ -26,25 +24,48 @@ has inflators => (
     handles    => { 
 		has_inflator => 'get', 
 		get_inflator => 'get', 
-		set_inflator => 'set', 
+		set_inflator => 'set',
+		add_inflator => 'set',
 		find_inflator => 'get'
 	}
 );
 
-sub add_deflator {
-	my ($self, $type_name, $via) = @_;
-	unless( $type_name && $REGISTRY->find_type_constraint($type_name) ) {
-		#Moose->throw_error('Could not find type constraint ' . $type_name);
-	}
-	$self->set_deflator($type_name, $via);
-}
-
-sub add_inflator {
-	my ($self, $type_name, $via) = @_;
-	unless( $type_name && $REGISTRY->find_type_constraint($type_name) ) {
-		#Moose->throw_error('Could not find type constraint ' . $type_name);
-	}
-	$self->set_inflator($type_name, $via);
-}
 
 1;
+
+=head1 DESCRIPTION
+
+This class contains a registry for deflator and inflator functions.
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item B<< inflators ( isa => HashRef[CodeRef] ) >>
+
+=item B<< deflators ( isa => HashRef[CodeRef] ) >>
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item B<< add_inflator( $type_constraint, $coderef ) >>
+
+=item B<< add_deflator( $type_constraint, $coderef ) >>
+
+=item B<< set_inflator( $type_constraint, $coderef ) >>
+
+=item B<< set_deflator( $type_constraint, $coderef ) >>
+
+Add a inflator/deflator function for C<$type_constraint>. Existing functions
+are overwritten.
+
+=item B<< has_inflator( $type_constraint ) >>
+
+=item B<< has_deflator( $type_constraint )  >>
+
+Predicate method.
+
+=back
