@@ -12,7 +12,8 @@ foreach my $m (qw( deflator inflator)) {
     __PACKAGE__->meta->add_method(
         $action => sub {
             my ( $self, $obj, $value, $constraint, @rest ) = @_;
-            $value ||= $self->get_value($obj);
+            $value ||= $self->get_value($obj) if($m eq 'deflator' && $self->has_value($obj));
+            return undef unless(defined $value);
             $constraint ||= $self->type_constraint;
             ( my $name = $constraint->name ) =~ s/\[.*\]/\[\]/;
             if ( my $via = $REGISTRY->$get($name) ) {
