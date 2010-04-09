@@ -59,7 +59,7 @@ __END__
                isa => 'DateTime', 
                required => 1, 
                default => sub { DateTime->now }, 
-               traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+               traits => ['Deflator'] );
 
   package main;
   

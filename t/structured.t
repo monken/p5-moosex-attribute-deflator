@@ -45,15 +45,15 @@ subtype StringIntMaybeHashRef,
         Str, Int, MyDT, Maybe[HashRef]
      ];
      
-has fullname => ( is => 'rw', isa => Fullname, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has fullname => ( is => 'rw', isa => Fullname, traits => ['Deflator'] );
 
-has person => ( isa => Person, is => 'rw', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has person => ( isa => Person, is => 'rw', traits => ['Deflator'] );
 
-has person2 => ( isa => Person, is => 'rw', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has person2 => ( isa => Person, is => 'rw', traits => ['Deflator'] );
 
-has tuple => ( isa => StringIntMaybeHashRef, is => 'rw', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has tuple => ( isa => StringIntMaybeHashRef, is => 'rw', traits => ['Deflator'] );
 
-has map => ( isa => Map[Str,MyDT], is => 'rw', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has map => ( isa => Map[Str,MyDT], is => 'rw', traits => ['Deflator'] );
 
 package main;
 

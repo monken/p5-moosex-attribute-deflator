@@ -19,17 +19,17 @@ inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) };
 
 
 
-has hashref => ( is => 'rw', isa => 'HashRef', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has hashref => ( is => 'rw', isa => 'HashRef', traits => ['Deflator'] );
 
-has hashrefarray => ( is => 'rw', isa => 'HashRef[ArrayRef[HashRef]]', traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has hashrefarray => ( is => 'rw', isa => 'HashRef[ArrayRef[HashRef]]', traits => ['Deflator'] );
 
-has datetime => ( is => 'rw', isa => 'DateTime', required => 1, default => sub { DateTime->now }, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has datetime => ( is => 'rw', isa => 'DateTime', required => 1, default => sub { DateTime->now }, traits => ['Deflator'] );
 
-has datetimearrayref => ( is => 'rw', isa => 'ArrayRef[DateTime]', required => 1, default => sub { [DateTime->now, DateTime->now->add(hours => 1) ] }, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has datetimearrayref => ( is => 'rw', isa => 'ArrayRef[DateTime]', required => 1, default => sub { [DateTime->now, DateTime->now->add(hours => 1) ] }, traits => ['Deflator'] );
 
-has scalarint => ( is => 'rw', isa => 'ScalarRef[Int]', required => 1, default => sub { \1 }, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has scalarint => ( is => 'rw', isa => 'ScalarRef[Int]', required => 1, default => sub { \1 }, traits => ['Deflator'] );
 
-has bool => ( is => 'rw', isa => 'Bool', default => 1, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has bool => ( is => 'rw', isa => 'Bool', default => 1, traits => ['Deflator'] );
 
 package main;
 

@@ -1,6 +1,6 @@
 package MooseX::Attribute::Deflator::Registry;
 # ABSTRACT: Registry class for attribute deflators
-use Moose;
+use Moose 1.01;
 
 has deflators => ( 
 	traits => ['Hash'],

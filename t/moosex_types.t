@@ -10,7 +10,7 @@ use JSON;
 
 use Types q(:all);
 
-has hashref => ( is => 'rw', isa => MyHashRef, traits => ['MooseX::Attribute::Deflator::Meta::Role::Attribute'] );
+has hashref => ( is => 'rw', isa => MyHashRef, traits => ['Deflator'] );
 
 package main;
 
