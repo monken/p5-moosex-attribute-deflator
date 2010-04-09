@@ -75,3 +75,13 @@ inflate 'MooseX::Types::Structured::Tuple[]', via {
 };
 
 1;
+
+__END__
+
+=head1 SYNOPSIS
+
+  use MooseX::Attribute::Deflator::Structured;
+  
+=head1 DESCRIPTION
+
+Using this module registers sane type deflators and inflators for L<MooseX::Types::Structured>.

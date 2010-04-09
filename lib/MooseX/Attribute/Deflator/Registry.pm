@@ -33,6 +33,8 @@ has inflators => (
 
 1;
 
+__END__
+
 =head1 DESCRIPTION
 
 This class contains a registry for deflator and inflator functions.
@@ -66,6 +68,6 @@ are overwritten.
 
 =item B<< has_deflator( $type_constraint )  >>
 
-Predicate method.
+Predicate methods.
 
 =back

@@ -39,6 +39,8 @@ foreach my $m (qw( deflator inflator)) {
 
 1;
 
+__END__
+
 =head1 SYNOPSIS
 
   package Test;

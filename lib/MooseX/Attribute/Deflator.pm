@@ -1,5 +1,5 @@
 package MooseX::Attribute::Deflator;
-# ABSTRACT: Deflates Moose attributes to a string
+# ABSTRACT: Deflates and inflates Moose attributes to and from a string
 
 use strict;
 use warnings;

@@ -60,3 +60,23 @@ inflate 'Maybe[]', via {
 };
 
 1;
+
+__END__
+
+=head1 SYNOPSIS
+
+  use MooseX::Attribute::Deflator::Moose;
+  
+=head1 DESCRIPTION
+
+Using this module registers sane type deflators and inflators for Moose's built in types.
+
+Some notes:
+
+=over
+
+=item * HashRef and ArrayRef deflate/inflate using JSON
+
+=item * ScalarRef is dereferenced on deflation and returns a reference on inflation
+
+=back
