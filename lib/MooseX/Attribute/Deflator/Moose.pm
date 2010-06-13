@@ -18,7 +18,7 @@ deflate 'Item', via { $_ };
 inflate 'Item', via { $_ };
 
 deflate 'HashRef[]', via {
-    my ($obj, $constraint, $deflate) = @_;
+    my ($attr, $constraint, $deflate) = @_;
     my $value = {%$_};
     while(my($k,$v) = each %$value) {
         $value->{$k} = $deflate->($value->{$k}, $constraint->type_parameter);
@@ -27,7 +27,7 @@ deflate 'HashRef[]', via {
 };
 
 inflate 'HashRef[]', via {
-    my ($obj, $constraint, $inflate) = @_;
+    my ($attr, $constraint, $inflate) = @_;
     my $value = $inflate->($_, $constraint->parent);
     while(my($k,$v) = each %$value) {
         $value->{$k} = $inflate->($value->{$k}, $constraint->type_parameter);
@@ -36,26 +36,26 @@ inflate 'HashRef[]', via {
 };
 
 deflate 'ArrayRef[]', via {
-    my ($obj, $constraint, $deflate) = @_;
+    my ($attr, $constraint, $deflate) = @_;
     my $value = [@$_];
     $_ = $deflate->($_, $constraint->type_parameter) for(@$value);
     return $deflate->($value, $constraint->parent);
 };
 
 inflate 'ArrayRef[]', via {
-    my ($obj, $constraint, $inflate) = @_;
+    my ($attr, $constraint, $inflate) = @_;
     my $value = $inflate->($_, $constraint->parent);
     $_ = $inflate->($_, $constraint->type_parameter) for(@$value);
     return $value;
 };
 
 deflate 'Maybe[]', via {
-    my ($obj, $constraint, $deflate) = @_;
+    my ($attr, $constraint, $deflate) = @_;
     return $deflate->($_, $constraint->type_parameter);
 };
 
 inflate 'Maybe[]', via {
-    my ($obj, $constraint, $inflate) = @_;
+    my ($attr, $constraint, $inflate) = @_;
     return $inflate->($_, $constraint->type_parameter);
 };
 

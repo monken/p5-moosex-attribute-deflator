@@ -46,4 +46,20 @@ my $obj = Test->new;
     is_deeply($inflated, {foo => 'bar'})
 }
 
+  package LazyInflator;
+
+  use Moose;
+  use MooseX::Attribute::LazyInflator;
+  use MooseX::Attribute::Deflator::Moose;
+
+  has hash => ( is => 'rw', 
+               isa => 'HashRef',
+               traits => ['LazyInflator'] );
+
+  package main;
+  
+  $obj = LazyInflator->new( hash => '{"foo":"bar"}' );
+  # Attribute 'hash' is being inflated on access
+  is_deeply($obj->hash, { foo => 'bar' });
+
 done_testing;

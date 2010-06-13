@@ -119,9 +119,9 @@ and with the following arguments:
 
 =over 8
 
-=item C<$instance>
+=item C<$attr>
 
-The object instance on which this deflator/inflator has been called
+The attribute on which this deflator/inflator has been called
 
 =item C<$constraint>
 
@@ -133,9 +133,14 @@ A code reference to the deflate or inflate function. E.g. this is handy if you w
 to call the type's parent's parent inflate or deflate method:
 
  deflate 'MySubSubType', via {
-    my ($obj, $constraint, $deflate) = @_;
+    my ($attr, $constraint, $deflate) = @_;
     return $deflate->($_, $constraint->parent->parent);
  };
+
+=item C<$instance>
+
+The object instance on which this deflator/inflator has been called
+
 
 =item C<@_>
 

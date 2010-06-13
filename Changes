@@ -1,2 +1,6 @@
+1.101640 - 2010-06-13
+  - Added LazyInflator and test
+  - Refactored inflate/deflate and Registry for speed
+
 1.100990 - 2010-04-09
-  - initial release
+  - Initial release
