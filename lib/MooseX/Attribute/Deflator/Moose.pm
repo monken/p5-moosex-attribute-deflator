@@ -59,6 +59,16 @@ inflate 'Maybe[]', via {
     return $inflate->($_, $constraint->type_parameter);
 };
 
+deflate 'ScalarRef[]', via {
+    my ($attr, $constraint, $deflate) = @_;
+    return ${$deflate->($_, $constraint->type_parameter)};
+};
+
+inflate 'ScalarRef[]', via {
+    my ($attr, $constraint, $inflate) = @_;
+    return \$inflate->($_, $constraint->type_parameter);
+};
+
 1;
 
 __END__

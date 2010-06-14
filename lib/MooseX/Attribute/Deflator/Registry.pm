@@ -86,4 +86,10 @@ are overwritten.
 
 Predicate methods.
 
+=item B<< find_inflator( $type_constraint ) >>
+
+=item B<< find_deflator( $type_constraint )  >>
+
+Finds a suitable deflator/inflator by bubbling up the type hierarchy.
+
 =back

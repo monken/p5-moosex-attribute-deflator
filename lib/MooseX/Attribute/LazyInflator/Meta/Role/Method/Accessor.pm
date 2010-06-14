@@ -9,14 +9,12 @@ sub _inline_check_lazy {
     my ($self, $instance) = @_;
     
     my $slot_exists = $self->_inline_has($instance);
-    
-    my $code = "unless(!$slot_exists || $instance->_inflated_attributes->{\$attr->name}++) {\n";
+    my $code = "if($slot_exists && !\$attr->is_inflated($instance)) {\n";
     $code .= "  \$attr->set_value($instance, \$attr->inflate($instance, ";
     $code .= $self->_inline_get($instance);
     $code .= "));\n";
     $code .= "}\n\n";
     $code .= $self->next::method($instance);
-   
     return $code;
 }
 

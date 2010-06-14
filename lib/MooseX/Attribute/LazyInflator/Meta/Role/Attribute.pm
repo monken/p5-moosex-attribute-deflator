@@ -14,10 +14,23 @@ override _coerce_and_verify => sub {
 
 before get_value => sub {
     my ($self, $instance) = @_;
-    return if(!$self->has_value($instance));
-    return if($instance->_inflated_attributes->{$self->name}++);
+    return if(!$self->has_value($instance) || $self->is_inflated($instance));
     $self->set_value($instance, $self->inflate($instance, $self->get_raw_value($instance)));
 };
+
+sub is_inflated {
+    my ($self, $instance, $value) = @_;
+    return $instance->_inflated_attributes->{$self->name} = $value
+        if(defined $value);
+    if($instance->_inflated_attributes->{$self->name}) {
+        return 1;
+    } else {
+        return 
+            $self->has_type_constraint 
+            && $self->type_constraint->check($self->get_raw_value($instance))
+            && ++$instance->_inflated_attributes->{$self->name}
+    }
+}
 
 use MooseX::Attribute::LazyInflator::Meta::Role::Method::Accessor;
 sub accessor_metaclass { 'MooseX::Attribute::LazyInflator::Meta::Role::Method::Accessor' }
@@ -53,6 +66,11 @@ This role consumes L<MooseX::Attribute::Deflator::Meta::Role::Attribute>.
 =head1 METHODS
 
 =over 8
+
+=item B<is_inflated( $intance )>
+
+Returns a true value if the value of the attribute passes the type contraint
+or has been inflated.
 
 =item before B<get_value>
 

@@ -9,9 +9,10 @@ use DateTime;
 use MooseX::Attribute::LazyInflator;
 use MooseX::Attribute::Deflator::Moose;
 
-use MooseX::Types::Moose qw(Str Int HashRef ArrayRef Maybe);
+use MooseX::Types::Moose qw(Str Int HashRef ScalarRef ArrayRef Maybe);
      
 has hash => ( is => 'rw', isa => HashRef, traits => [qw(LazyInflator)] );
+has scalar => ( is => 'rw', isa => 'ScalarRef[Str]' , traits => [qw(LazyInflator)] );
 has lazyhash => ( is => 'rw', isa => HashRef, lazy => 1, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
 has defaulthash => ( is => 'rw', isa => HashRef, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
 
@@ -46,6 +47,15 @@ for(1..2) {
         
         $t = Test->new( lazyhash => q({"foo":"bar"}) );
         is_deeply($t->lazyhash, { foo => 'bar' }, 'Value has been inflated through accessor');
+    }
+    
+    {
+        my $attr = $meta->get_attribute('hash');
+        $t = Test->new( hash => { foo => 'bar' }, scalar => 'foo' );
+        ok($attr->is_inflated($t), 'Attribute is inflated');
+        $attr = $meta->get_attribute('scalar');
+        ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
+        
     }
     
     Test->meta->make_immutable;
