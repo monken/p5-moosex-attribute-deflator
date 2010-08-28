@@ -1,3 +1,6 @@
+1.120000 - 2010-08-28
+  - Coerce and LazyInflator work as expected
+
 1.101670 - 2010-06-16
   - Added is_inflated attribute meta class method
   - Mark attributes as being inflated on construction

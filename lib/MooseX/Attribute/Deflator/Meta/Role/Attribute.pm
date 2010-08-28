@@ -97,4 +97,7 @@ of the attribute.
 Inflates a string C<$string>. This method does not set the value of
 the attribute to the inflated value.
 
+=item B<< $attr->has_inflator >>
+=item B<< $attr->has_deflator >>
+
 =back
