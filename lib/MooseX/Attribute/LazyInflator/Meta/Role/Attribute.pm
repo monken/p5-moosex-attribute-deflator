@@ -6,10 +6,10 @@ use strict;
 use warnings;
 with 'MooseX::Attribute::Deflator::Meta::Role::Attribute';
 
-override _coerce_and_verify => sub {
-    my ($self, $value, $instance) = @_;
-    return $value unless($instance->_inflated_attributes && $instance->_inflated_attributes->{$self->name});
-    super();
+override verify_against_type_constraint => sub {
+    my ($self, $value, undef, $instance) = @_;
+    return 1 if(!$self->is_inflated($instance));
+    super;
 };
 
 before get_value => sub {
@@ -76,10 +76,9 @@ or has been inflated.
 
 The attribute's value is being inflated and set if it has a value and hasn't been inflated yet.
 
-=item override B<_coerce_and_verify>
+=item override B<verify_against_type_constraint>
 
-Coercion and type constraint verification is not processed if the
-attribute has not been inflated yet.
+Will return true if the attribute hasn't been inflated yet.
 
 =back
 

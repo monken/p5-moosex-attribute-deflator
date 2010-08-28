@@ -5,11 +5,6 @@ use Moose::Role;
 use strict;
 use warnings;
 
-override _generate_type_coercion => sub {
-    my $self = shift;
-    return $self->_generate_skip_coercion_and_constraint($_[0], super);
-};
-
 override _generate_type_constraint_check => sub {
     my $self = shift;
     return $self->_generate_skip_coercion_and_constraint($_[0], super);
@@ -31,13 +26,11 @@ __END__
 
 =over 8
 
-=item override B<_generate_type_coercion>
-
 =item override B<_generate_type_constraint_check>
 
 =item B<_generate_skip_coercion_and_constraint>
 
-Coercion and type constraint verification is not processed if the
+Type constraint verification is not processed if the
 attribute has not been inflated yet.
 
 =back
