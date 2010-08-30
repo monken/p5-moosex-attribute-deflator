@@ -1,3 +1,6 @@
+1.120001 - 2010-08-28
+  - Speed up inflation
+
 1.120000 - 2010-08-28
   - Coerce and LazyInflator work as expected
 
