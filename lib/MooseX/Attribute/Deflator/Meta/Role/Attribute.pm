@@ -13,6 +13,7 @@ sub deflate {
     $value ||= $self->get_value($obj) if($self->has_value($obj) || $self->is_required);
     return undef unless(defined $value);
     $constraint ||= $self->type_constraint;
+    return $value unless($constraint);
     Moose->throw_error( "Cannot deflate " . $self->name )
         unless ( my $via = $REGISTRY->find_deflator($constraint) );
     return $via->(
@@ -25,6 +26,7 @@ sub inflate {
     my ( $self, $obj, $value, $constraint, @rest ) = @_;
     return undef unless(defined $value);
     $constraint ||= $self->type_constraint;
+    return $value unless($constraint);
     Moose->throw_error( "Cannot inflate " . $self->name )
         unless ( my $via = $REGISTRY->find_inflator($constraint) );
     return $via->(

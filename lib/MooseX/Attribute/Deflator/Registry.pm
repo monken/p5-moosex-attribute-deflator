@@ -1,6 +1,6 @@
 package MooseX::Attribute::Deflator::Registry;
 # ABSTRACT: Registry class for attribute deflators
-use Moose 1.15;
+use Moose;
 use Data::Dumper;
 
 has deflators => ( 

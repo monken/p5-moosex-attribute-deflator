@@ -31,52 +31,64 @@ has scalarint => ( is => 'rw', isa => 'ScalarRef[Int]', required => 1, default =
 
 has bool => ( is => 'rw', isa => 'Bool', default => 1, traits => ['Deflator'] );
 
+has no_type => ( is => 'rw', traits => ['Deflator'] );
+
 package main;
 
-my $obj = Test->new( hashref => { foo => 'bar' }, hashrefarray => { foo => [{ foo => 'bar'}] } );
-    
 
-{
-    is_deeply( $obj->meta->get_attribute('hashref')->get_value($obj), { foo => 'bar' } );
-    is( $obj->meta->get_attribute('hashref')->deflate($obj), '{"foo":"bar"}' );
-    is_deeply( $obj->meta->get_attribute('hashref')->inflate($obj, '{"foo":"bar"}'), {foo => 'bar'} );
-    is( $obj->meta->get_attribute('hashrefarray')->deflate($obj), '{"foo":"[\"{\\\\\"foo\\\\\":\\\\\"bar\\\\\"}\"]"}' );
-    is_deeply( $obj->meta->get_attribute('hashrefarray')->inflate($obj, '{"foo":"[\"{\\\\\"foo\\\\\":\\\\\"bar\\\\\"}\"]"}'), 
-        { foo => [{ foo => 'bar'}] } );    
+for(1..2) {
+    my $obj = Test->new( hashref => { foo => 'bar' }, hashrefarray => { foo => [{ foo => 'bar'}] }, no_type => 1 );
+
+    {
+        is_deeply( $obj->meta->get_attribute('hashref')->get_value($obj), { foo => 'bar' } );
+        is( $obj->meta->get_attribute('hashref')->deflate($obj), '{"foo":"bar"}' );
+        is_deeply( $obj->meta->get_attribute('hashref')->inflate($obj, '{"foo":"bar"}'), {foo => 'bar'} );
+        is( $obj->meta->get_attribute('hashrefarray')->deflate($obj), '{"foo":"[\"{\\\\\"foo\\\\\":\\\\\"bar\\\\\"}\"]"}' );
+        is_deeply( $obj->meta->get_attribute('hashrefarray')->inflate($obj, '{"foo":"[\"{\\\\\"foo\\\\\":\\\\\"bar\\\\\"}\"]"}'), 
+            { foo => [{ foo => 'bar'}] } );    
+    }
+
+    {
+        isa_ok($obj->datetime, 'DateTime');
+        my $epoch = $obj->meta->get_attribute('datetime')->deflate($obj);
+        like( $epoch, qr/^\d+$/, 'deflated to epoch time');
+        is( $obj->meta->get_attribute('datetime')->inflate($obj, $epoch), $obj->datetime, 'inflates to same time');
+        isa_ok($obj->datetime, 'DateTime');
+    }
+
+    {
+        isa_ok($obj->datetimearrayref->[0], 'DateTime');
+        my $times = $obj->meta->get_attribute('datetimearrayref')->deflate($obj);
+        isa_ok($obj->datetimearrayref->[0], 'DateTime');
+        like( $times, qr/^\[\d+,\d+\]$/, 'deflated to json with epoch time');
+        my $inflated = $obj->meta->get_attribute('datetimearrayref')->inflate($obj, $times);
+        is_deeply( $obj->meta->get_attribute('datetimearrayref')->inflate($obj, $times), $obj->datetimearrayref, 'inflates to same time');
+    }
+
+    {
+        is(ref $obj->scalarint, 'SCALAR', 'scalar ref attribute');
+        my $num = $obj->meta->get_attribute('scalarint')->deflate($obj);
+        is($num, 1, 'deflates to int');
+        is_deeply($obj->meta->get_attribute('scalarint')->inflate($obj, 1), \1, 'inflates to scalarref');
+
+    }
+
+    {
+        ok($obj->bool, 'bool is true');
+        my $bool = $obj->meta->get_attribute('bool')->deflate($obj);
+        ok($bool, 'deflates to a true value');
+        is_deeply($obj->meta->get_attribute('bool')->inflate($obj, 1), 1, 'inflates to a true value');
+
+    }
+    {
+        ok($obj->no_type, 'no_type exists');
+        my $no_type = $obj->meta->get_attribute('no_type')->deflate($obj);
+        is($no_type, '1');
+        is_deeply($obj->meta->get_attribute('no_type')->inflate($obj, 1), 1, 'inflates to same value');
+
+    }
+    diag "making immutable" if($_ eq 1);
+    Test->meta->make_immutable;
 }
-
-{
-    isa_ok($obj->datetime, 'DateTime');
-    my $epoch = $obj->meta->get_attribute('datetime')->deflate($obj);
-    like( $epoch, qr/^\d+$/, 'deflated to epoch time');
-    is( $obj->meta->get_attribute('datetime')->inflate($obj, $epoch), $obj->datetime, 'inflates to same time');
-    isa_ok($obj->datetime, 'DateTime');
-}
-
-{
-    isa_ok($obj->datetimearrayref->[0], 'DateTime');
-    my $times = $obj->meta->get_attribute('datetimearrayref')->deflate($obj);
-    isa_ok($obj->datetimearrayref->[0], 'DateTime');
-    like( $times, qr/^\[\d+,\d+\]$/, 'deflated to json with epoch time');
-    my $inflated = $obj->meta->get_attribute('datetimearrayref')->inflate($obj, $times);
-    is_deeply( $obj->meta->get_attribute('datetimearrayref')->inflate($obj, $times), $obj->datetimearrayref, 'inflates to same time');
-}
-
-{
-    is(ref $obj->scalarint, 'SCALAR', 'scalar ref attribute');
-    my $num = $obj->meta->get_attribute('scalarint')->deflate($obj);
-    is($num, 1, 'deflates to int');
-    is_deeply($obj->meta->get_attribute('scalarint')->inflate($obj, 1), \1, 'inflates to scalarref');
-
-}
-
-{
-    ok($obj->bool, 'bool is true');
-    my $bool = $obj->meta->get_attribute('bool')->deflate($obj);
-    ok($bool, 'deflates to a true value');
-    is_deeply($obj->meta->get_attribute('bool')->inflate($obj, 1), 1, 'inflates to a true value');
-
-}
-
 
 done_testing;

@@ -12,54 +12,67 @@ no MooseX::Attribute::Deflator;
 
 use MooseX::Attribute::Deflator::Moose;
 
-has now => ( is => 'rw', 
-           isa => 'DateTime', 
-           default => sub { DateTime->now }, 
-           traits => ['Deflator'] );
+has now => (
+    is      => 'rw',
+    isa     => 'DateTime',
+    default => sub { DateTime->now },
+    traits  => ['Deflator']
+);
 
-has hash => ( is => 'rw', 
-              isa => 'HashRef', 
-              default => sub { { foo => 'bar' } }, 
-              traits => ['Deflator'] );
+has hash => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    default => sub { { foo => 'bar' } },
+    traits  => ['Deflator']
+);
 
 package main;
 
-use Test::More;
+use Test::Most;
 
 my $obj = Test->new;
 
 {
-    my $attr = $obj->meta->get_attribute('now');
+    my $attr     = $obj->meta->get_attribute('now');
     my $deflated = $attr->deflate($obj);
-    like($deflated, qr/^\d+$/);
+    like( $deflated, qr/^\d+$/ );
 
-    my $inflated = $attr->inflate($obj, $deflated);
-    isa_ok($inflated, 'DateTime');
+    my $inflated = $attr->inflate( $obj, $deflated );
+    isa_ok( $inflated, 'DateTime' );
 }
 
 {
-    my $attr = $obj->meta->get_attribute('hash');
+    my $attr     = $obj->meta->get_attribute('hash');
     my $deflated = $attr->deflate($obj);
-    is($deflated, '{"foo":"bar"}');
+    is( $deflated, '{"foo":"bar"}' );
 
-    my $inflated = $attr->inflate($obj, $deflated);
-    is_deeply($inflated, {foo => 'bar'})
+    my $inflated = $attr->inflate( $obj, $deflated );
+    is_deeply( $inflated, { foo => 'bar' } )
 }
 
-  package LazyInflator;
+package LazyInflator;
 
-  use Moose;
-  use MooseX::Attribute::LazyInflator;
-  use MooseX::Attribute::Deflator::Moose;
+use Moose;
+use MooseX::Attribute::LazyInflator;
+use MooseX::Attribute::Deflator::Moose;
 
-  has hash => ( is => 'rw', 
-               isa => 'HashRef',
-               traits => ['LazyInflator'] );
+has hash => (
+    is     => 'rw',
+    isa    => 'HashRef',
+    traits => ['LazyInflator']
+);
 
-  package main;
-  
-  $obj = LazyInflator->new( hash => '{"foo":"bar"}' );
-  # Attribute 'hash' is being inflated on access
-  is_deeply($obj->hash, { foo => 'bar' });
+package main;
 
+for ( 1 .. 2 ) {
+    $obj = LazyInflator->new( hash => '{"foo":"bar"}' );
+
+    # Attribute 'hash' is being inflated on access
+    is_deeply( $obj->hash, { foo => 'bar' } );
+
+    $obj = LazyInflator->new( hash => '[1,2,3]' );
+    throws_ok { $obj->hash } qr/constraint/, 'throws on wrong type';
+
+    LazyInflator->meta->make_immutable;
+}
 done_testing;

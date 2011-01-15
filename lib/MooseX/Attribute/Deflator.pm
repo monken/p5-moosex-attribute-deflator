@@ -8,10 +8,11 @@ use MooseX::Attribute::Deflator::Registry;
 use Moose::Util qw();
 
 sub via (&) { $_[0] }
+sub inline (&) { $_[0] }
 
 Moose::Exporter->setup_import_methods(
     as_is => [
-        qw( deflate inflate via )
+        qw( deflate inflate via inline )
     ],
 );
 
@@ -20,13 +21,11 @@ my $REGISTRY = MooseX::Attribute::Deflator::Registry->new;
 sub get_registry { $REGISTRY }
 
 sub deflate {
-	my ($type_name, $via) = @_;
-	$REGISTRY->add_deflator($type_name, $via);
+	$REGISTRY->add_deflator(@_);
 }
 
 sub inflate {
-	my ($type_name, $via) = @_;
-	$REGISTRY->add_inflator($type_name, $via);
+	$REGISTRY->add_inflator(@_);
 }
 
 

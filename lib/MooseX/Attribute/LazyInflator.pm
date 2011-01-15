@@ -5,7 +5,7 @@ use Moose();
 use MooseX::Attribute::Deflator ();
 use Moose::Exporter;
 use Moose::Util ();
-
+use MooseX::Attribute::LazyInflator::Meta::Role::Attribute;
 Moose::Exporter->setup_import_methods;
 
 sub init_meta {
@@ -13,13 +13,6 @@ sub init_meta {
       my %args = @_;
 
       Moose->init_meta(%args);
-
-      Moose::Util::MetaRole::apply_metaroles(
-          for             => $args{for_class},
-          class_metaroles => {
-              constructor => ['MooseX::Attribute::LazyInflator::Meta::Role::Method::Constructor'],
-          },
-      );
 
       Moose::Util::apply_all_roles($args{for_class}, 'MooseX::Attribute::LazyInflator::Role::Class');
 

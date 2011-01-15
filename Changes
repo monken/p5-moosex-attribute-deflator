@@ -1,3 +1,9 @@
+1.
+  - Moose 2.0 compliant
+  - Made mutable classes behavior consistent with immutable
+  - Some speed improvement using inlining of code
+  - Allow attributes without type constraints
+
 1.130000 - 2010-10-10
   - Fixed compat with Moose 1.15
 

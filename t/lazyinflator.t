@@ -16,6 +16,7 @@ has scalar => ( is => 'rw', isa => 'ScalarRef[Str]' , traits => [qw(LazyInflator
 has lazyhash => ( is => 'rw', isa => HashRef, lazy => 1, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
 has defaulthash => ( is => 'rw', isa => HashRef, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
 
+has lazybitch => ( is => 'ro', lazy => 1, default => sub { 1 } );
 package main;
 
 use JSON;
@@ -38,6 +39,7 @@ for(1..2) {
     
     {
         my $attr = $meta->get_attribute('lazyhash');
+        ok($attr->is_lazy, 'Attribute is lazy');
         ok(!$attr->has_value($t), 'Attribute has no value');
         is($attr->get_raw_value($t), undef, 'Raw value is undef');
         is_deeply($attr->get_value($t), { key => 'value' }, 'get_value calls builder');
@@ -57,7 +59,7 @@ for(1..2) {
         ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
         
     }
-    
+    diag "making immutable" if($_ eq 1);
     Test->meta->make_immutable;
 }
 
