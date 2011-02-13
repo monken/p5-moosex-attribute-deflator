@@ -1,3 +1,7 @@
+1.130001 - 2011-02-13
+  - has_deflator/inflator return undef if there is no
+    type constraint
+
 1.130000 - 2010-10-10
   - Fixed compat with Moose 1.15
 

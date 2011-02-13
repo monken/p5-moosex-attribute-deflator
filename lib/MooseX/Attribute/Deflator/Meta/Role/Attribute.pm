@@ -10,34 +10,40 @@ no MooseX::Attribute::Deflator;
 
 sub deflate {
     my ( $self, $obj, $value, $constraint, @rest ) = @_;
-    $value ||= $self->get_value($obj) if($self->has_value($obj) || $self->is_required);
-    return undef unless(defined $value);
+    $value ||= $self->get_value($obj)
+      if ( $self->has_value($obj) || $self->is_required );
+    return undef unless ( defined $value );
     $constraint ||= $self->type_constraint;
     Moose->throw_error( "Cannot deflate " . $self->name )
-        unless ( my $via = $REGISTRY->find_deflator($constraint) );
-    return $via->(
-            $self, $constraint, sub { $self->deflate( $obj, @_ ) }, $obj, @rest
-    ) for ($value);
+      unless ( my $via = $REGISTRY->find_deflator($constraint) );
+    return
+      $via->( $self, $constraint, sub { $self->deflate( $obj, @_ ) },
+              $obj, @rest
+      ) for ($value);
 }
-
 
 sub inflate {
     my ( $self, $obj, $value, $constraint, @rest ) = @_;
-    return undef unless(defined $value);
+    return undef unless ( defined $value );
     $constraint ||= $self->type_constraint;
     Moose->throw_error( "Cannot inflate " . $self->name )
-        unless ( my $via = $REGISTRY->find_inflator($constraint) );
-    return $via->(
-            $self, $constraint, sub { $self->inflate( $obj, @_ ) }, $obj, @rest
-    ) for ($value);
+      unless ( my $via = $REGISTRY->find_inflator($constraint) );
+    return
+      $via->( $self, $constraint, sub { $self->inflate( $obj, @_ ) },
+              $obj, @rest
+      ) for ($value);
 }
 
 sub has_deflator {
-    $REGISTRY->get_deflator( shift->type_constraint->name );
+    my $self = shift;
+    return unless ( $self->has_type_constraint );
+    $REGISTRY->get_deflator( $self->type_constraint->name );
 }
 
 sub has_inflator {
-    $REGISTRY->get_inflator( shift->type_constraint->name );
+    my $self = shift;
+    return unless ( $self->has_type_constraint );
+    $REGISTRY->get_inflator( $self->type_constraint->name );
 }
 
 1;
