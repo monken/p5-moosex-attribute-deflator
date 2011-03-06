@@ -48,7 +48,7 @@ override _inline_get_value => sub {
     );
     push @code, super();
     return @code;
-};
+} if Moose->VERSION >= 1.9900;
 
 sub is_inflated {
     my ( $self, $instance, $value ) = @_;
@@ -66,6 +66,13 @@ sub is_inflated {
           && $self->type_constraint->check($value)
           && ++$instance->_inflated_attributes->{ $self->name };
     }
+}
+
+if (Moose->VERSION < 1.9900) {
+    require MooseX::Attribute::LazyInflator::Meta::Role::Method::Accessor;
+    override accessor_metaclass => sub {
+        'MooseX::Attribute::LazyInflator::Meta::Role::Method::Accessor'
+    };
 }
 
 sub _inline_instance_is_inflated {
@@ -96,7 +103,7 @@ sub _inline_instance_is_inflated {
 override _inline_tc_code => sub {
     #my $self = shift;
     return ('');
-};
+} if Moose->VERSION >= 1.9900;
 
 1;
 

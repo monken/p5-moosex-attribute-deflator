@@ -14,6 +14,13 @@ sub init_meta {
 
       Moose->init_meta(%args);
 
+      Moose::Util::MetaRole::apply_metaroles(
+          for             => $args{for_class},
+          class_metaroles => {
+              constructor => ['MooseX::Attribute::LazyInflator::Meta::Role::Method::Constructor'],
+          },
+      ) if Moose->VERSION < 1.9900;
+
       Moose::Util::apply_all_roles($args{for_class}, 'MooseX::Attribute::LazyInflator::Role::Class');
 
       return $args{for_class}->meta;
