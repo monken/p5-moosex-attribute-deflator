@@ -1,4 +1,4 @@
-1.130001 - 2011-02-13
+1.130002 - 2011-02-13
   - has_deflator/inflator return undef if there is no
     type constraint
 
