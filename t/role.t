@@ -18,18 +18,26 @@ has defaulthash => ( is => 'rw', isa => HashRef, default => sub { { key => 'valu
 
 has lazybitch => ( is => 'ro', lazy => 1, default => sub { 1 } );
 
-package Test;
-use Moose;
-#use MooseX::Attribute::LazyInflator;
+package MyInterRole;
+use Moose::Role;
 with 'MyRole';
+
+package Test1;
+use Moose;
+with 'MyRole';
+
+package Test2;
+use Moose;
+with 'MyInterRole';
 
 package main;
 
 use JSON;
 use Test::Exception;
 
-for(1..2) {
-    my $t = Test->new( hash => q({"foo":"bar"}) );
+for(0..3) {
+    my $class = "Test" . ( $_ % 2 + 1 );
+    my $t = $class->new( hash => q({"foo":"bar"}) );
     my $meta = $t->meta;
     {
         my $attr = $meta->get_attribute('hash');
@@ -39,7 +47,7 @@ for(1..2) {
         is_deeply($attr->get_value($t), { foo => 'bar' }, 'Value has been inflated');
         is_deeply($attr->get_value($t), { foo => 'bar' }, 'Value has not been inflated again');
 
-        $t = Test->new( hash => q({"foo":"bar"}) );
+        $t = $class->new( hash => q({"foo":"bar"}) );
         is_deeply($t->hash, { foo => 'bar' }, 'Value has been inflated through accessor');
     }
     
@@ -50,23 +58,23 @@ for(1..2) {
         is($attr->get_raw_value($t), undef, 'Raw value is undef');
         is_deeply($attr->get_value($t), { key => 'value' }, 'get_value calls builder');
         
-        $t = Test->new;
+        $t = $class->new;
         is_deeply($t->lazyhash, { key => 'value' }, 'Builder works on accessor');
         
-        $t = Test->new( lazyhash => q({"foo":"bar"}) );
+        $t = $class->new( lazyhash => q({"foo":"bar"}) );
         is_deeply($t->lazyhash, { foo => 'bar' }, 'Value has been inflated through accessor');
     }
     
     {
         my $attr = $meta->get_attribute('hash');
-        $t = Test->new( hash => { foo => 'bar' }, scalar => 'foo' );
+        $t = $class->new( hash => { foo => 'bar' }, scalar => 'foo' );
         ok($attr->is_inflated($t), 'Attribute is inflated');
         $attr = $meta->get_attribute('scalar');
         ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
         
     }
     diag "making immutable" if($_ eq 1);
-    Test->meta->make_immutable;
+    $class->meta->make_immutable;
 }
 
 done_testing;

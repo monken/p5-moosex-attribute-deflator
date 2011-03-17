@@ -8,6 +8,7 @@ use Moose::Exporter;
 use Moose::Util ();
 use MooseX::Attribute::LazyInflator::Meta::Role::Attribute;
 use MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass;
+use MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToRole;
 
 Moose::Exporter->setup_import_methods(
     Moose->VERSION < 1.9900
@@ -19,7 +20,10 @@ Moose::Exporter->setup_import_methods(
         } )
     : (),
     role_metaroles => {
-        application_to_class => ['MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass'],
+          application_to_class =>
+            ['MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass'],
+          application_to_role =>
+            ['MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToRole'],
     },
     base_class_roles => ['MooseX::Attribute::LazyInflator::Role::Class'] );
 
