@@ -30,9 +30,10 @@ has inflators => (
 );
 
 sub find_deflator {
-    my ($self, $constraint) = @_;
+    my ($self, $constraint, $norecurse) = @_;
     ( my $name = $constraint->name ) =~ s/\[.*\]/\[\]/;
     my $sub = $self->get_deflator($name);
+    return undef if(!$sub && $norecurse);
     if(!$sub && $constraint->has_parent) {
         $sub = $self->find_deflator($constraint->parent);
         $self->set_deflator($name, $sub) if($sub);
@@ -42,9 +43,10 @@ sub find_deflator {
 
 
 sub find_inflator {
-    my ($self, $constraint) = @_;
+    my ($self, $constraint, $norecurse) = @_;
     ( my $name = $constraint->name ) =~ s/\[.*\]/\[\]/;
     my $sub = $self->get_inflator($name);
+    return undef if(!$sub && $norecurse);
     if(!$sub && $constraint->has_parent) {
         $sub = $self->find_inflator($constraint->parent);
         $self->set_inflator($name, $sub) if($sub);

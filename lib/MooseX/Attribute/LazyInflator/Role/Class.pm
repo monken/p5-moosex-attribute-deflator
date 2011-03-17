@@ -7,6 +7,7 @@ use warnings;
 
 has _inflated_attributes => ( is => 'rw', isa => 'HashRef', lazy => 1, default => sub {{}} );
 
+
 1;
 
 __END__
