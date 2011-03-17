@@ -1,3 +1,7 @@
+  - deflate/inflate return now the value of the attribute
+    even if no deflator/inflator could be found
+  - has_deflator/inflator now work correctly with typed contraints
+
 2.0.0
   - Moose 2.0 compliant
   - Moose 1.24 compliant (thanks doy)
