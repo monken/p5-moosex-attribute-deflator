@@ -1,3 +1,4 @@
+2.0.1 - 2011-03-17
   - deflate/inflate return now the value of the attribute
     even if no deflator/inflator could be found
   - has_deflator/inflator now work correctly with typed contraints

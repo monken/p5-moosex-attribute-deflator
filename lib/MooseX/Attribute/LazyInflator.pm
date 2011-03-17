@@ -1,4 +1,5 @@
 package MooseX::Attribute::LazyInflator;
+
 # ABSTRACT: Deflates and inflates Moose attributes to and from a string
 
 use Moose();
@@ -6,29 +7,19 @@ use MooseX::Attribute::Deflator ();
 use Moose::Exporter;
 use Moose::Util ();
 use MooseX::Attribute::LazyInflator::Meta::Role::Attribute;
-Moose::Exporter->setup_import_methods;
+Moose::Exporter->setup_import_methods(
+    Moose->VERSION < 1.9900
+    ? (
+        class_metaroles => {
+            constructor => [
+'MooseX::Attribute::LazyInflator::Meta::Role::Method::Constructor'
+            ],
+        } )
+    : (),
+    base_class_roles => ['MooseX::Attribute::LazyInflator::Role::Class'] );
 
-sub init_meta {
-      shift;
-      my %args = @_;
-
-      Moose->init_meta(%args);
-
-      Moose::Util::MetaRole::apply_metaroles(
-          for             => $args{for_class},
-          class_metaroles => {
-              constructor => ['MooseX::Attribute::LazyInflator::Meta::Role::Method::Constructor'],
-          },
-      ) if Moose->VERSION < 1.9900;
-
-      Moose::Util::apply_all_roles($args{for_class}, 'MooseX::Attribute::LazyInflator::Role::Class');
-
-      return $args{for_class}->meta;
-}
-
-Moose::Util::_create_alias('Attribute', 'LazyInflator', 1, 'MooseX::Attribute::LazyInflator::Meta::Role::Attribute');
-
-
+Moose::Util::_create_alias( 'Attribute', 'LazyInflator', 1,
+                     'MooseX::Attribute::LazyInflator::Meta::Role::Attribute' );
 
 1;
 
