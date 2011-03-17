@@ -1,4 +1,4 @@
-2.1.0 - 
+2.1.0 - 2011-03-17
   - Deflating/Inflating attributes can now be defined in roles
     and composed in a class that doesn't use LazyDeflator
     directly.
