@@ -1,3 +1,8 @@
+2.1.0 - 
+  - Deflating/Inflating attributes can now be defined in roles
+    and composed in a class that doesn't use LazyDeflator
+    directly.
+
 2.0.1 - 2011-03-17
   - deflate/inflate return now the value of the attribute
     even if no deflator/inflator could be found

@@ -73,7 +73,7 @@ for(0..3) {
         ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
         
     }
-    diag "making immutable" if($_ eq 1);
+    diag "making immutable" if($_ % 2);
     $class->meta->make_immutable;
 }
 
