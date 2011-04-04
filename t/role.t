@@ -30,13 +30,20 @@ package Test2;
 use Moose;
 with 'MyInterRole';
 
+package MyEmptyRole;
+use Moose::Role;
+
+package Test3;
+use Moose;
+with 'MyRole', 'MyEmptyRole';
+
 package main;
 
 use JSON;
 use Test::Exception;
 
-for(0..3) {
-    my $class = "Test" . ( $_ % 2 + 1 );
+for(0..5) {
+    my $class = "Test" . ( $_ % 3 + 1 );
     my $t = $class->new( hash => q({"foo":"bar"}) );
     my $meta = $t->meta;
     {
@@ -73,7 +80,7 @@ for(0..3) {
         ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
         
     }
-    diag "making immutable" if($_ % 2);
+    diag "making immutable" if($_ < 3);
     $class->meta->make_immutable;
 }
 

@@ -20,6 +20,7 @@ Moose::Exporter->setup_import_methods(
         } )
     : (),
     role_metaroles => {
+          role => ['MooseX::Attribute::LazyInflator::Meta::Role::Role'],
           application_to_class =>
             ['MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass'],
           application_to_role =>
