@@ -2,8 +2,7 @@ package MooseX::Attribute::Deflator::Meta::Role::Attribute;
 
 # ABSTRACT: Attribute meta role to support deflation
 use Moose::Role;
-use strict;
-use warnings;
+use Try::Tiny;
 use MooseX::Attribute::Deflator;
 my $REGISTRY = MooseX::Attribute::Deflator->get_registry;
 no MooseX::Attribute::Deflator;
@@ -14,26 +13,40 @@ sub deflate {
       if ( $self->has_value($obj) || $self->is_required );
     return undef unless ( defined $value );
     $constraint ||= $self->type_constraint;
-    return $value unless($constraint);
+    return $value unless ($constraint);
     return $value
       unless ( my $via = $REGISTRY->find_deflator($constraint) );
-    return
-      $via->( $self, $constraint, sub { $self->deflate( $obj, @_ ) },
-              $obj, @rest
-      ) for ($value);
+    my $return;
+    try {
+        $return = $via->( $self, $constraint,
+                          sub { $self->deflate( $obj, @_ ) },
+                          $obj, @rest
+        ) for ($value);
+    }
+    catch {
+        die qq{Failed to deflate value "$value" (${\($constraint->name)}): $_};
+    };
+    return $return;
 }
 
 sub inflate {
     my ( $self, $obj, $value, $constraint, @rest ) = @_;
     return undef unless ( defined $value );
     $constraint ||= $self->type_constraint;
-    return $value unless($constraint);
+    return $value unless ($constraint);
     return $value
       unless ( my $via = $REGISTRY->find_inflator($constraint) );
-    return
-      $via->( $self, $constraint, sub { $self->inflate( $obj, @_ ) },
-              $obj, @rest
-      ) for ($value);
+    my $return;
+    try {
+        $return = $via->( $self, $constraint,
+                          sub { $self->inflate( $obj, @_ ) },
+                          $obj, @rest
+        ) for ($value);
+    }
+    catch {
+        die qq{Failed to inflate value "$value" (${\($constraint->name)}): $_};
+    };
+    return $return;
 }
 
 sub has_deflator {

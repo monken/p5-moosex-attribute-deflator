@@ -101,8 +101,11 @@ sub _inline_instance_is_inflated {
 }
 
 override _inline_tc_code => sub {
-    #my $self = shift;
-    return ('');
+    my $self = shift;
+    return (
+        $self->_inline_check_coercion(@_),
+        # $self->_inline_check_constraint(@_),
+    );
 } if Moose->VERSION >= 1.9900;
 
 1;
