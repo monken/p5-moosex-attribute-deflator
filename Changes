@@ -1,4 +1,8 @@
-2.1.3 - 2011-04-12
+2.1.5 - 2011-06-08
+  - fixed is_inflated() returning false results when called
+    while the object is being created
+
+2.1.4 - 2011-04-12
   - better diagnostics when inflation/deflation fails
   - fixed bug where coercion didn't happen with Moose > 1.99
 

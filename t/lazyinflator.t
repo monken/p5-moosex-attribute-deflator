@@ -15,15 +15,15 @@ has hash => ( is => 'rw', isa => HashRef, traits => [qw(LazyInflator)] );
 has scalar => ( is => 'rw', isa => 'ScalarRef[Str]' , traits => [qw(LazyInflator)] );
 has lazyhash => ( is => 'rw', isa => HashRef, lazy => 1, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
 has defaulthash => ( is => 'rw', isa => HashRef, default => sub { { key => 'value' } }, traits => [qw(LazyInflator)] );
-
 has lazybitch => ( is => 'ro', lazy => 1, default => sub { 1 } );
+has bool => ( is => 'rw', isa => 'Bool', traits => [qw(LazyInflator)] );
 package main;
 
 use JSON;
 use Test::Exception;
 
 for(1..2) {
-    my $t = Test->new( hash => q({"foo":"bar"}) );
+    my $t = Test->new( hash => q({"foo":"bar"}), bool => \1 );
     my $meta = $t->meta;
     {
         my $attr = $meta->get_attribute('hash');

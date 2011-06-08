@@ -9,7 +9,7 @@ with 'MooseX::Attribute::Deflator::Meta::Role::Attribute';
 
 override verify_against_type_constraint => sub {
     my ( $self, $value, undef, $instance ) = @_;
-    return $value if ( !$self->is_inflated($instance) );
+    return $value if ( !$self->is_inflated($instance, undef, $value) );
     return super();
 };
 
@@ -51,14 +51,14 @@ override _inline_get_value => sub {
 } if Moose->VERSION >= 1.9900;
 
 sub is_inflated {
-    my ( $self, $instance, $value ) = @_;
+    my ( $self, $instance, $value, $from_constructor ) = @_;
     return $instance->_inflated_attributes->{ $self->name } = $value
       if ( defined $value );
     if ( $instance->_inflated_attributes->{ $self->name } ) {
         return 1;
     }
     else {
-        my $value = $self->get_raw_value($instance);
+        my $value = defined $from_constructor ? $from_constructor : $self->get_raw_value($instance);
         $value = $self->type_constraint->coerce($value)
           if ( $self->should_coerce && $self->type_constraint->has_coercion );
         return
