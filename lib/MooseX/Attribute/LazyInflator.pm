@@ -11,14 +11,6 @@ use MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass;
 use MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToRole;
 
 Moose::Exporter->setup_import_methods(
-    Moose->VERSION < 1.9900
-    ? (
-        class_metaroles => {
-            constructor => [
-'MooseX::Attribute::LazyInflator::Meta::Role::Method::Constructor'
-            ],
-        } )
-    : (),
     role_metaroles => {
           role => ['MooseX::Attribute::LazyInflator::Meta::Role::Role'],
           application_to_class =>
