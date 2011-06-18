@@ -25,31 +25,6 @@ before get_value => sub {
     $self->set_raw_value( $instance, $value );
 };
 
-override _inline_get_value => sub {
-    my ( $self, $instance, $tc, $tc_obj ) = @_;
-    $tc     ||= '$type_constraint';
-    $tc_obj ||= '$type_constraint_obj';
-    my $slot_exists = $self->_inline_instance_has($instance);
-    my @code        = (
-        "if($slot_exists && !(",
-        $self->_inline_instance_is_inflated( $instance, $tc, $tc_obj ),
-        ")) {",
-        'my $inflated = '
-          . "\$attr->inflate($instance, "
-          . $self->_inline_instance_get($instance) . ");",
-        $self->has_type_constraint
-        ? (
-            $self->_inline_check_coercion( '$inflated', $tc, $tc_obj, 1 ),
-            $self->_inline_check_constraint( '$inflated', $tc, $tc_obj, 1 )
-          )
-        : (),
-        $self->_inline_init_slot( $instance, '$inflated' ),
-        "}"
-    );
-    push @code, super();
-    return @code;
-};
-
 sub is_inflated {
     my ( $self, $instance, $value, $from_constructor ) = @_;
     return $instance->_inflated_attributes->{ $self->name } = $value
@@ -68,38 +43,140 @@ sub is_inflated {
     }
 }
 
-sub _inline_instance_is_inflated {
-    my ( $self, $instance, $tc, $tc_obj ) = @_;
-    my @code =
-      (     $instance
-          . '->{_inflated_attributes}->{"'
-          . quotemeta( $self->name )
-          . '"}' );
-    return @code if ( !$self->has_type_constraint );
-    my $value = $self->_inline_instance_get($instance);
-    my $coerce =
-        $self->should_coerce && $self->type_constraint->has_coercion
-      ? $tc_obj . '->coerce(' . $value . ')'
-      : $value;
-    push @code,
-      (     ' || (' 
-          . $tc . '->('
-          . $coerce
-          . ') && ++'
-          . $instance
-          . '->{_inflated_attributes}->{"'
-          . quotemeta( $self->name )
-          . '"})' );
-    return @code;
-}
+if (Moose->VERSION >= 2.0100) {
+    override _inline_get_value => sub {
+        my ( $self, $instance, $tc, $coercion, $message ) = @_;
+        $tc       ||= '$type_constraint';
+        $coercion ||= '$type_coercion';
+        $message  ||= '$type_message';
+        my $slot_exists = $self->_inline_instance_has($instance);
+        my @code = (
+            "if($slot_exists && !(",
+            $self->_inline_instance_is_inflated( $instance, $tc, $coercion ),
+            ")) {",
+            'my $inflated = '
+            . "\$attr->inflate($instance, "
+            . $self->_inline_instance_get($instance) . ");",
+            $self->has_type_constraint
+            ? (
+                $self->_inline_check_coercion( '$inflated', $tc, $coercion, 1 ),
+                $self->_inline_check_constraint( '$inflated', $tc, $message, 1 )
+            )
+            : (),
+            $self->_inline_init_slot( $instance, '$inflated' ),
+            "}"
+        );
+        push @code, super();
+        return @code;
+    };
 
-override _inline_tc_code => sub {
-    my $self = shift;
-    return (
-        $self->_inline_check_coercion(@_),
-        # $self->_inline_check_constraint(@_),
-    );
-};
+    __PACKAGE__->meta->add_method(_inline_instance_is_inflated => sub {
+        my ( $self, $instance, $tc, $coercion ) = @_;
+        my @code =
+        (     $instance
+            . '->{_inflated_attributes}->{"'
+            . quotemeta( $self->name )
+            . '"}' );
+        return @code if ( !$self->has_type_constraint );
+        my $value = $self->_inline_instance_get($instance);
+        my $coerce =
+            $self->should_coerce && $self->type_constraint->has_coercion
+        ? $coercion . '->(' . $value . ')'
+        : $value;
+        my $check = $self->type_constraint->can_be_inlined
+        ? $self->type_constraint->_inline_check($coerce)
+        : $tc . '->(' . $coerce . ')';
+        push @code,
+        (     ' || ('
+            . $check
+            . ' && ++'
+            . $instance
+            . '->{_inflated_attributes}->{"'
+            . quotemeta( $self->name )
+            . '"})' );
+        return @code;
+    });
+
+    override _inline_tc_code => sub {
+        my $self = shift;
+        my ($value, $tc, $coercion, $message, $is_lazy) = @_;
+        return (
+            $self->_inline_check_coercion(
+                $value, $tc, $coercion, $is_lazy,
+            ),
+            # $self->_inline_check_constraint(
+            #     $value, $tc, $message, $is_lazy,
+            # ),
+        );
+    };
+
+    override _eval_environment => sub {
+        my $self = shift;
+        return {
+            %{ super() },
+            '$attr' => \$self,
+        };
+    };
+}
+else {
+    override _inline_get_value => sub {
+        my ( $self, $instance, $tc, $tc_obj ) = @_;
+        $tc     ||= '$type_constraint';
+        $tc_obj ||= '$type_constraint_obj';
+        my $slot_exists = $self->_inline_instance_has($instance);
+        my @code        = (
+            "if($slot_exists && !(",
+            $self->_inline_instance_is_inflated( $instance, $tc, $tc_obj ),
+            ")) {",
+            'my $inflated = '
+            . "\$attr->inflate($instance, "
+            . $self->_inline_instance_get($instance) . ");",
+            $self->has_type_constraint
+            ? (
+                $self->_inline_check_coercion( '$inflated', $tc, $tc_obj, 1 ),
+                $self->_inline_check_constraint( '$inflated', $tc, $tc_obj, 1 )
+            )
+            : (),
+            $self->_inline_init_slot( $instance, '$inflated' ),
+            "}"
+        );
+        push @code, super();
+        return @code;
+    };
+
+    __PACKAGE__->meta->add_method(_inline_instance_is_inflated => sub {
+        my ( $self, $instance, $tc, $tc_obj ) = @_;
+        my @code =
+        (     $instance
+            . '->{_inflated_attributes}->{"'
+            . quotemeta( $self->name )
+            . '"}' );
+        return @code if ( !$self->has_type_constraint );
+        my $value = $self->_inline_instance_get($instance);
+        my $coerce =
+            $self->should_coerce && $self->type_constraint->has_coercion
+        ? $tc_obj . '->coerce(' . $value . ')'
+        : $value;
+        push @code,
+        (     ' || (' 
+            . $tc . '->('
+            . $coerce
+            . ') && ++'
+            . $instance
+            . '->{_inflated_attributes}->{"'
+            . quotemeta( $self->name )
+            . '"})' );
+        return @code;
+    });
+
+    override _inline_tc_code => sub {
+        my $self = shift;
+        return (
+            $self->_inline_check_coercion(@_),
+            # $self->_inline_check_constraint(@_),
+        );
+    };
+}
 
 1;
 
