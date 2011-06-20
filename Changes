@@ -1,3 +1,7 @@
+2.1.6 - 2011-06-20
+  - readded support for Moose 1.25
+  - added support for Moose 2.02 (doy)
+
 2.1.5 - 2011-06-08
   - fixed is_inflated() returning false results when called
     while the object is being created
