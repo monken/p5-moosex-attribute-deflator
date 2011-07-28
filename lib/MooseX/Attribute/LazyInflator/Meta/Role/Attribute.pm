@@ -16,7 +16,6 @@ override verify_against_type_constraint => sub {
 before get_value => sub {
     my ( $self, $instance ) = @_;
     return if ( !$self->has_value($instance) || $self->is_inflated($instance) );
-    $self->is_inflated($instance);
     my $value = $self->inflate( $instance, $self->get_raw_value($instance) );
     $value = $self->type_constraint->coerce($value)
       if ( $self->should_coerce && $self->type_constraint->has_coercion );
