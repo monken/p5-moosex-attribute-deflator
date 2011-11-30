@@ -2,12 +2,12 @@ use Test::More;
 use strict;
 use warnings;
 
-package Test;
+package MyTest;
 
 use Moose;
 use DateTime;
 
-use MooseX::Types::Moose qw(Str Int HashRef ArrayRef Maybe);
+use MooseX::Types::Moose qw(Str Int HashRef ArrayRef Maybe Undef);
 use MooseX::Types::Structured qw(Dict Tuple Map Optional);
 use MooseX::Types -declare => [qw(Fullname Person StringIntMaybeHashRef MyDT)];
 
@@ -35,7 +35,7 @@ subtype Person,
                 name=>Fullname,
                 birthday => Optional[MyDT],
                 friends=>Optional[
-                        ArrayRef[Person]
+                        ArrayRef[Person|Undef]
                 ],
          ];
 
@@ -98,7 +98,7 @@ my @test = (
 
 );
 
-my $obj = Test->new( map { $_->{attribute} => $_->{value} } @test );
+my $obj = MyTest->new( map { $_->{attribute} => $_->{value} } @test );
 
 
 
