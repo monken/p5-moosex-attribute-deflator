@@ -1,3 +1,6 @@
+2.1.8 - 2011-11-30
+  - fixed structured.t to work with latest moose
+
 2.1.7 - 2011-07-28
   - perfomance improvement by removing redundant call to is_inflated (thanks timbunce)
 
