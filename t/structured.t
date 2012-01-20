@@ -16,8 +16,9 @@ use MooseX::Attribute::Deflator::Structured;
 use MooseX::Attribute::Deflator::Moose;
 
 use MooseX::Attribute::Deflator;
-deflate 'DateTime', via { $_->epoch };
-inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) };
+deflate 'DateTime', via { $_->epoch }, inline {'$value->epoch'};
+inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) },
+    inline {'DateTime->from_epoch( epoch => $value )'};
 no MooseX::Attribute::Deflator;
 
 class_type 'DateTime';
@@ -34,9 +35,9 @@ subtype Person,
          as Dict[
                 name=>Fullname,
                 birthday => Optional[MyDT],
-                friends=>Optional[
-                        ArrayRef[Person|Undef]
-                ],
+                #friends=>Optional[
+                #        ArrayRef[Person]
+                #],
          ];
 
         
@@ -104,6 +105,8 @@ my $obj = MyTest->new( map { $_->{attribute} => $_->{value} } @test );
 
 foreach my $test(@test) {
     my $attribute = $obj->meta->get_attribute($test->{attribute});
+    is($attribute->is_deflator_inlined, $Moose::VERSION >= 1.9, 'inlined deflator');
+    is($attribute->is_inflator_inlined, $Moose::VERSION >= 1.9, 'inlined inflator');
     is_deeply( $attribute->get_value($obj), $test->{value}, 'value of ' . $attribute->name . ' is set correctly' );
     my $json = $attribute->deflate($obj);
     is_deeply( decode_json($json), $test->{deflated} || $test->{value}, 'deflation of ' . $attribute->name . ' works' );

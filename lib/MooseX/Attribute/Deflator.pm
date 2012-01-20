@@ -1,4 +1,5 @@
 package MooseX::Attribute::Deflator;
+
 # ABSTRACT: Deflates and inflates Moose attributes to and from a string
 
 use strict;
@@ -7,29 +8,33 @@ use Moose::Exporter;
 use MooseX::Attribute::Deflator::Registry;
 use Moose::Util qw();
 
-sub via (&) { $_[0] }
+sub via (&)    { $_[0] }
 sub inline (&) { $_[0] }
 
 Moose::Exporter->setup_import_methods(
-    as_is => [
-        qw( deflate inflate via inline )
-    ],
-);
+    as_is => [ qw( deflate inflate via inline ) ], );
 
 my $REGISTRY = MooseX::Attribute::Deflator::Registry->new;
 
-sub get_registry { $REGISTRY }
+sub get_registry {$REGISTRY}
 
 sub deflate {
-	$REGISTRY->add_deflator(@_);
+    my $types = shift;
+    $types = [$types] unless ( ref $types eq 'ARRAY' );
+    $REGISTRY->add_deflator( $_, @_ ) for (@$types);
 }
 
 sub inflate {
-	$REGISTRY->add_inflator(@_);
+    my $types = shift;
+    $types = [$types] unless ( ref $types eq 'ARRAY' );
+    $REGISTRY->add_inflator( $_, @_ ) for (@$types);
 }
 
+deflate 'Item', via {$_}, inline {'$value'};
+inflate 'Item', via {$_}, inline {'$value'};
 
-Moose::Util::_create_alias('Attribute', 'Deflator', 1, 'MooseX::Attribute::Deflator::Meta::Role::Attribute');
+Moose::Util::_create_alias( 'Attribute', 'Deflator', 1,
+    'MooseX::Attribute::Deflator::Meta::Role::Attribute' );
 
 1;
 
@@ -37,18 +42,23 @@ __END__
 
 =head1 SYNOPSIS
 
- package Test;
+ package MySynopsis;
 
  use Moose;
  use DateTime;
 
  use MooseX::Attribute::Deflator;
 
- deflate 'DateTime', via { $_->epoch };
- inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) };
+ deflate 'DateTime',
+    via { $_->epoch },
+    inline { '$value->epoch' }; # optional
+ inflate 'DateTime',
+    via { DateTime->from_epoch( epoch => $_ ) },
+    inline { 'DateTime->from_epoch( epoch => $value )' }; # optional
 
  no MooseX::Attribute::Deflator;
 
+ # import default deflators and inflators for Moose types
  use MooseX::Attribute::Deflator::Moose;
 
  has now => ( is => 'rw', 
@@ -65,7 +75,7 @@ __END__
 
  use Test::More;
 
- my $obj = Test->new;
+ my $obj = MySynopsis->new;
 
  {
      my $attr = $obj->meta->get_attribute('now');
@@ -98,6 +108,15 @@ will bubble up the type hierarchy and use the first deflator or inflator it find
 
 This comes at a cost: B<Union types are not supported>.
 
+For extra speed, inflators and deflators can be inlined. All in/deflators that come with this
+module have an inlined version as well. Whenever you implment custom type in/deflators, you
+should consider writing the inlining code as well. The performance boost is immense. You
+can check whether an deflator has been inlined by calling:
+
+ $attr->is_deflator_inlined;
+
+B<Inlining works in Moose >= 1.9 only.>
+
 =head1 FUNCTIONS
 
 =over 4
@@ -106,9 +125,13 @@ This comes at a cost: B<Union types are not supported>.
 
 =item B<< inflate >>
 
- deflate 'DateTime', via { $_->epoch };
- 
- inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) };
+ deflate 'DateTime',
+    via { $_->epoch },
+    inline { '$value->epoch' }; # optional
+
+ inflate 'DateTime',
+    via { DateTime->from_epoch( epoch => $_ ) },
+    inline { 'DateTime->from_epoch( epoch => $value )' }; # optional
     
 Defines a deflator or inflator for a given type constraint. This can also be
 a type constraint defined via L<MooseX::Types> and parameterized types.
@@ -138,8 +161,7 @@ to call the type's parent's parent inflate or deflate method:
 
 =item C<$instance>
 
-The object instance on which this deflator/inflator has been called
-
+The object instance on which this deflator/inflator has been called.
 
 =item C<@_>
 
@@ -148,4 +170,85 @@ or L<MooseX::Attribute::Deflator::Meta::Role::Attribute/deflate>.
 
 =back
 
+For C<inline>, the parameters are handled a bit differently. The code generating subroutine
+is called with the following parameters:
+
+=over 8
+
+=item C<$constraint>
+
+The type constraint attached to the attribute.
+
+=item C<$attr>
+
+The attribute on which this deflator/inflator has been called.
+
+=item C<$registry>
+
+ my $parent = $registry->($constraint->parent);
+ my $code = $parent->($constraint->parent, $attr, $registry, @_);
+
+To get the code generator of a type constraint, call this function.
+
 =back
+
+The C<inline> function is expected to return a string. The generated code
+has access to a number of variables:
+
+=over 8
+
+=item C<$value>
+
+Most important, the value that should be de- or inflated is stored in C<$value>.
+
+=item C<$type_constraint>
+
+=back
+
+For some more advanced examples, have a look at the source of
+L<MooseX::Attribute::Deflator::Moose> and L<MooseX::Attribute::Deflator::Structured>.
+
+=back
+
+=head1 PERFORMANCE
+
+The overhead for having custom deflators or inflators per attribute is minimal.
+The file C<benchmark.pl> tests three ways of deflating the value of a HashRef attribute
+to a json encoded string (using L<JSON::XS>).
+
+ my $obj     = MyBenchmark->new( hashref => { foo => 'bar' } );
+ my $attr    = MyBenchmark->meta->get_attribute('hashref');
+
+=over
+
+=item deflate
+
+ $attr->deflate($obj); 
+
+Using the deflate attribute method, supplied by this module.
+
+=item accessor
+
+ JSON::XS::encode_json($obj->hashref);
+
+If the attribute comes with an accessor, you can use this
+method, to deflate its value. However, you need to know the
+name of the accessor in order to use this method.
+
+=item get_value
+
+ JSON::XS::encode_json($attr->get_value($obj, 'hashref'));
+
+This solves the mentioned problem with not knowing the
+accessor name.
+
+=back
+
+The results clearly states that using the C<deflate> method
+adds only minimal overhead to deflating the attribute
+value manually.
+
+               Rate get_value   deflate  accessor
+ get_value  71480/s        --      -89%      -90%
+ deflate   657895/s      820%        --      -12%
+ accessor  751880/s      952%       14%        --
