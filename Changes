@@ -1,3 +1,7 @@
+2.1.9-TRIAL - 2012-01-20
+  - inline deflators and inflators
+    huge performance improvement
+
 2.1.8 - 2011-11-30
   - fixed structured.t to work with latest moose
 
