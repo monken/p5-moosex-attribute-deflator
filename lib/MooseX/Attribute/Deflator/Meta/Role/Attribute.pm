@@ -15,24 +15,22 @@ sub _inline_deflator {
     my $self = shift;
     my $role = Moose::Meta::Role->create_anon_role;
     foreach my $type (qw(deflator inflator)) {
-        my $find
-            = $type eq 'deflator'
-            ? 'find_inlined_deflator'
-            : 'find_inlined_inflator';
+        my $find        = "find_$type";
         my $method      = $type eq 'deflator' ? 'deflate' : 'inflate';
         my $tc          = $self->type_constraint;
         my $slot_access = $self->_inline_instance_get('$_[1]');
-        my $deflator    = $tc
-            ? do {
-            my $inline = eval { $REGISTRY->$find($tc) } or next;
-            $inline->( $tc, $self, sub { $REGISTRY->$find(@_) } );
-            }
-            : $slot_access;
-        my $has_value  = $self->_inline_instance_has('$_[1]');
-        my @check_lazy = $self->_inline_check_lazy(
+        my $has_value   = $self->_inline_instance_has('$_[1]');
+        my @check_lazy  = $self->_inline_check_lazy(
             '$_[1]',          '$type_constraint',
             '$type_coercion', '$type_message',
         );
+        my $deflator = $tc
+            ? do {
+            ( $tc, undef, my $inline ) = $REGISTRY->$find($tc);
+            next unless $inline;
+            $inline->( $tc, $self, sub { $REGISTRY->$find(@_) } );
+            }
+            : $slot_access;
         my @code = ('sub {');
         if ( $type eq 'deflator' ) {
             push( @code,
@@ -67,7 +65,8 @@ sub deflate {
     $constraint ||= $self->type_constraint;
     return $value unless ($constraint);
     return $value
-        unless ( my $via = $REGISTRY->find_deflator($constraint) );
+        unless ( ( $constraint, my $via )
+        = $REGISTRY->find_deflator($constraint) );
     my $return;
     try {
         $return = $via->(
@@ -88,7 +87,8 @@ sub inflate {
     $constraint ||= $self->type_constraint;
     return $value unless ($constraint);
     return $value
-        unless ( my $via = $REGISTRY->find_inflator($constraint) );
+        unless ( ( $constraint, my $via )
+        = $REGISTRY->find_inflator($constraint) );
     my $return;
     try {
         $return = $via->(
