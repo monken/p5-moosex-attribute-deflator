@@ -18,6 +18,10 @@ inflate 'ArrayRef', via { JSON::decode_json($_) },
 deflate 'ScalarRef', via {$$_}, inline {'$$value'};
 inflate 'ScalarRef', via { \$_ }, inline {'\$value'};
 
+deflate 'Bool', via { $_ ? JSON::XS::true : JSON::XS::false },
+    inline {'$value ? JSON::XS::true : JSON::XS::false'};
+inflate 'Bool', via { $_ ? 1 : 0 }, inline {'$value ? 1 : 0'};
+
 deflate 'Item', via {$_}, inline {'$value'};
 inflate 'Item', via {$_}, inline {'$value'};
 
