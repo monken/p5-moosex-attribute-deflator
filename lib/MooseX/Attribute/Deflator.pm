@@ -103,6 +103,10 @@ This module consists of a a registry (L<MooseX::Attribute::Deflator::Registry>) 
 for Moose L<MooseX::Attribute::Deflator::Moose> and MooseX::Types::Strutured L<MooseX::Attribute::Deflator::Structured>.
 This class is just sugar to set the inflators and deflators.
 
+You can deflate to whatever data structure you want. Loading L<MooseX::Attribute::Deflator::Moose>
+will cause HashRefs and ArrayRefs to be encoded as JSON strings. However, you can simply overwrite
+those deflators (and inflators) to deflate to something different like L<Storable>.
+
 Unlike C<coerce>, you don't need to create a deflator and inflator for every type. Instead this module
 will bubble up the type hierarchy and use the first deflator or inflator it finds.
 
@@ -115,7 +119,7 @@ can check whether an deflator has been inlined by calling:
 
  $attr->is_deflator_inlined;
 
-B<Inlining works in Moose >= 1.9 only.>
+B<< Inlining works in Moose >= 1.9 only. >>
 
 =head1 FUNCTIONS
 
