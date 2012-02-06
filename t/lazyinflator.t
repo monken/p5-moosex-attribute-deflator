@@ -49,6 +49,9 @@ for(1..2) {
         
         $t = Test->new( lazyhash => q({"foo":"bar"}) );
         is_deeply($t->lazyhash, { foo => 'bar' }, 'Value has been inflated through accessor');
+        
+        $t = Test->new;
+        is($attr->deflate($t), q({"key":"value"}), 'deflator calls builder' );
     }
     
     {
@@ -57,7 +60,6 @@ for(1..2) {
         ok($attr->is_inflated($t), 'Attribute is inflated');
         $attr = $meta->get_attribute('scalar');
         ok(!$attr->is_inflated($t), 'ScalarRef attribute is not inflated');
-        
     }
     diag "making immutable" if($_ eq 1);
     Test->meta->make_immutable;

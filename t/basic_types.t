@@ -3,6 +3,7 @@ package Test;
 use Moose;
 use JSON;
 use DateTime;
+use Moose::Object;
 
 use MooseX::Attribute::Deflator::Moose;
 use MooseX::Attribute::Deflator;
@@ -10,6 +11,10 @@ use MooseX::Attribute::Deflator;
 deflate 'DateTime', via { $_->epoch }, inline {'$value->epoch'};
 inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) },
     inline {'DateTime->from_epoch( epoch => $value )'};
+
+my $mo = Moose::Object->new;
+deflate 'Moose::Object', via {1};
+inflate 'Moose::Object', via {$mo};
 
 my $dt = DateTime->now;
 
@@ -57,6 +62,13 @@ has bool =>
 
 has no_type => ( is => 'rw', traits => ['Deflator'], default => 'no_type' );
 
+has not_inlined => (
+    is      => 'ro',
+    isa     => 'ArrayRef[Moose::Object]',
+    default => sub { [ $mo ] },
+    traits  => ['Deflator'],
+);
+
 package main;
 use strict;
 use warnings;
@@ -70,6 +82,7 @@ my $results = {
     bool             => 1,
     scalarint        => 1,
     datetime         => $dt->epoch,
+    not_inlined      => '[1]',
     datetimearrayref => '['
         . $dt->epoch . ','
         . $dt->clone->add( hours => 1 )->epoch . ']',
@@ -77,6 +90,7 @@ my $results = {
 
 for ( 1 .. 2 ) {
     foreach my $attr ( Test->meta->get_all_attributes ) {
+        ok($attr, "work on attribute " . $attr->name);
         is( $attr->deflate($obj),
             $results->{ $attr->name },
             "result is $results->{$attr->name}"
@@ -88,15 +102,24 @@ for ( 1 .. 2 ) {
             "inflates $results->{$attr->name} correctly"
         );
 
+        next if ( $attr->name eq 'not_inlined' );
+
         is( $attr->is_deflator_inlined,
-            $Moose::VERSION >= 1.9,
+            $Moose::VERSION >= 1.9 ? 1 : 0,
             'deflator inlined'
         );
         is( $attr->is_inflator_inlined,
-            $Moose::VERSION >= 1.9,
+            $Moose::VERSION >= 1.9 ? 1 : 0,
             'inflator inlined'
         );
     }
+
+    {
+        my $attr = Test->meta->get_attribute('hashref');
+        is( $attr->deflate( $obj, { one => 'two' } ),
+            '{"one":"two"}', 'deflate with optional value' );
+    }
+
     diag "making immutable" if ( $_ eq 1 );
     Test->meta->make_immutable;
 }

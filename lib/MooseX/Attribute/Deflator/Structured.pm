@@ -11,7 +11,7 @@ deflate 'MooseX::Types::Structured::Optional[]', via {
     my $constraint = shift;
     my ( $attr, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return $parameter->( $constraint->type_parameter, @_ );
+    return $parameter;
 };
 
 inflate 'MooseX::Types::Structured::Optional[]', via {
@@ -21,7 +21,7 @@ inflate 'MooseX::Types::Structured::Optional[]', via {
     my $constraint = shift;
     my ( $attr, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return $parameter->( $constraint->type_parameter, @_ );
+    return $parameter;
 };
 
 deflate 'MooseX::Types::Structured::Map[]', via {
@@ -43,11 +43,11 @@ deflate 'MooseX::Types::Structured::Map[]', via {
         '$value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter->( $constraint->type_constraints->[1], @_ ),
+        $parameter,
         '    };',
         '  };',
         '}',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
     );
 };
 
@@ -67,13 +67,13 @@ inflate 'MooseX::Types::Structured::Map[]', via {
         = $deflators->( $constraint->type_constraints->[1] );
     return join( "\n",
         '$value = do {',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
         ' };',
         'while ( my ( $k, $v ) = each %$value ) {',
         '  $value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter->( $constraint->type_constraints->[1], @_ ),
+        $parameter,
         '    };',
         '  };',
         '}',
@@ -97,9 +97,9 @@ deflate 'MooseX::Types::Structured::Dict[]', via {
     my @map         = 'my $dict;';
     while ( my ( $k, $v ) = each %constraints ) {
         push( @map,
-            '$dict->{' . quotemeta($k) . '} = sub { ',
+            '$dict->{"' . quotemeta($k) . '"} = sub { ',
             'my $value = shift;',
-            $deflators->($v)->( $v, @_ ), ' };' );
+            $deflators->($v), ' };' );
     }
     return join( "\n",
         @map,
@@ -110,7 +110,7 @@ deflate 'MooseX::Types::Structured::Dict[]', via {
         '    $value = $dict->{$k}->($value);',
         '  };',
         '}',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
     );
 };
 
@@ -130,14 +130,14 @@ inflate 'MooseX::Types::Structured::Dict[]', via {
     my @map         = 'my $dict;';
     while ( my ( $k, $v ) = each %constraints ) {
         push( @map,
-            '$dict->{' . quotemeta($k) . '} = sub { ',
+            '$dict->{"' . quotemeta($k) . '"} = sub { ',
             'my $value = shift;',
-            $deflators->($v)->( $v, @_ ), ' };' );
+            $deflators->($v), ' };' );
     }
     return join( "\n",
         @map,
         '$value = do {',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
         ' };',
         'while ( my ( $k, $v ) = each %$value ) {',
         '$value->{$k} = do {',
@@ -168,7 +168,7 @@ deflate 'MooseX::Types::Structured::Tuple[]', via {
         push( @map,
             'push(@$tuple, sub {',
             'my $value = shift;',
-            $deflators->($tc)->( $tc, @_ ), ' });' );
+            $deflators->($tc), ' });' );
     }
     return join( "\n",
         @map,
@@ -179,7 +179,7 @@ deflate 'MooseX::Types::Structured::Tuple[]', via {
         '    $value = ($tuple->[$i] || $tuple->[-1])->($value);',
         '  };',
         '}',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
     );
 };
 
@@ -202,12 +202,12 @@ inflate 'MooseX::Types::Structured::Tuple[]', via {
         push( @map,
             'push(@$tuple, sub {',
             'my $value = shift;',
-            $deflators->($tc)->( $tc, @_ ), ' });' );
+            $deflators->($tc), ' });' );
     }
     return join( "\n",
         @map,
         '$value = do {',
-        $parent->( $constraint->parent, @_ ),
+        $parent,
         ' };',
         'for ( my $i = 0; $i < @$value; $i++ ) {',
         '$value->[$i] = do {',

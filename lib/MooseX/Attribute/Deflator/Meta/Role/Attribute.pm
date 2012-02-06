@@ -28,17 +28,34 @@ sub _inline_deflator {
             ? do {
             ( $tc, undef, my $inline ) = $REGISTRY->$find($tc);
             next unless $inline;
-            $inline->( $tc, $self, sub { $REGISTRY->$find(@_) } );
+            my $find_sub;
+            $find_sub = sub {
+                my $type_constraint = shift;
+                my @tc              = $REGISTRY->$find($type_constraint);
+                return join( "\n",
+                    'my ($tc, $via) = $registry->find_' 
+                        . $type
+                        . '(Moose::Util::TypeConstraints::find_type_constraint("'
+                        . quotemeta($type_constraint) . '"));',
+                    'my ($attr, $obj, @rest) = @_;',
+                    '$via->($attr, $tc, sub { $attr->deflate($obj, @rest) });'
+                ) unless ( $tc[2] );
+                return $tc[2]->( $tc[0], $self, $find_sub );
+            };
+            $inline->( $tc, $self, $find_sub );
             }
             : $slot_access;
         my @code = ('sub {');
         if ( $type eq 'deflator' ) {
             push( @code,
+                'my $value = $_[2];',
+                'unless(defined $value) {',
                 @check_lazy,
                 $self->is_required
                 ? ""
                 : "return undef unless($has_value);",
-                'my $value = ' . $slot_access . ';',
+                '$value = ' . $slot_access . ';',
+                '}',
             );
         }
         else {
@@ -46,8 +63,11 @@ sub _inline_deflator {
         }
         $role->add_method(
             $method => eval_closure(
-                environment => $self->_eval_environment,
-                source      => join( "\n", @code, $deflator, '}' )
+                environment => {
+                    %{ $self->_eval_environment },
+                    '$registry' => \$REGISTRY
+                },
+                source => join( "\n", @code, $deflator, '}' )
             )
         );
         $type eq 'deflator'
@@ -106,13 +126,15 @@ sub inflate {
 sub has_deflator {
     my $self = shift;
     return unless ( $self->has_type_constraint );
-    $REGISTRY->find_deflator( $self->type_constraint, 'norecurse' );
+    my @tc = $REGISTRY->find_deflator( $self->type_constraint, 'norecurse' );
+    return @tc ? 1 : 0;
 }
 
 sub has_inflator {
     my $self = shift;
     return unless ( $self->has_type_constraint );
-    $REGISTRY->find_inflator( $self->type_constraint, 'norecurse' );
+    my @tc = $REGISTRY->find_inflator( $self->type_constraint, 'norecurse' );
+    return @tc ? 1 : 0;
 }
 
 after install_accessors => \&_inline_deflator if ( $Moose::VERSION >= 1.9 );

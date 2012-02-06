@@ -1,3 +1,14 @@
+2.1.10-TRIAL - 2012-01-21
+  - improve ::Registry code, find_deflator returns inlined deflators if it exists
+  - call deflators with the type constraint it is defined for,
+    i.e. given a deflator that is defined for HashRef[] and a TC MyType that is
+    defined as 'MyType, as HashRef[Str]', the deflator as passed the HashRef[Str]
+    constraint instead of MyType. This simplifies the deflator code because you
+    don't have to call ->parent on the type constraint until it is of the expected
+    type. See the diff for ::Moose and ::Structured.
+  - ::Moose now comes with a deflator and inflator for Bool types.
+  - $attr->is_inflated is now inlined for better performance
+
 2.1.9-TRIAL - 2012-01-20
   - inline deflators and inflators
     huge performance improvement
