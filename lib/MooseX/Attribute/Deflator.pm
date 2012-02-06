@@ -253,6 +253,6 @@ adds only minimal overhead to deflating the attribute
 value manually.
 
                Rate get_value   deflate  accessor
- get_value  71480/s        --      -89%      -90%
- deflate   657895/s      820%        --      -12%
- accessor  751880/s      952%       14%        --
+ get_value  69832/s        --      -87%      -88%
+ deflate   543478/s      678%        --       -4%
+ accessor  564972/s      709%        4%        --

@@ -31,6 +31,8 @@ cmpthese(1_000_000, {
         JSON::XS::encode_json($attr->get_value($obj, 'hashref'));
     },
     accessor => sub {
-        JSON::XS::encode_json($obj->hashref);
+        my $value = $_[0];
+        $value = $obj->hashref unless(defined $value);
+        JSON::XS::encode_json($value);
     }
 });
