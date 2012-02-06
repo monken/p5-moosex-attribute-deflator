@@ -40,9 +40,9 @@ sub _inline_deflator {
                     'my ($attr, $obj, @rest) = @_;',
                     '$via->($attr, $tc, sub { $attr->deflate($obj, @rest) });'
                 ) unless ( $tc[2] );
-                return $tc[2]->( $tc[0], $self, $find_sub );
+                return $tc[2]->( $self, $tc[0], $find_sub );
             };
-            $inline->( $tc, $self, $find_sub );
+            $inline->( $self, $tc, $find_sub );
             }
             : $slot_access;
         my @code = ('sub {');

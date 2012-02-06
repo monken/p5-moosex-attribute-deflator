@@ -29,8 +29,7 @@ deflate 'HashRef[]', via {
     }
     return $deflate->( $value, $constraint->parent );
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
@@ -56,8 +55,7 @@ inflate 'HashRef[]', via {
     }
     return $value;
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
@@ -82,8 +80,7 @@ deflate 'ArrayRef[]', via {
     $_ = $deflate->( $_, $constraint->type_parameter ) for (@$value);
     return $deflate->( $value, $constraint->parent );
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
@@ -106,8 +103,7 @@ inflate 'ArrayRef[]', via {
     $_ = $inflate->( $_, $constraint->type_parameter ) for (@$value);
     return $value;
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
@@ -130,8 +126,7 @@ deflate 'Maybe[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
     return $deflate->( $_, $constraint->type_parameter );
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     return $deflators->( $constraint->type_parameter );
 };
 
@@ -139,8 +134,7 @@ inflate 'Maybe[]', via {
     my ( $attr, $constraint, $inflate ) = @_;
     return $inflate->( $_, $constraint->type_parameter );
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     return $deflators->( $constraint->type_parameter );
 };
 
@@ -148,8 +142,7 @@ deflate 'ScalarRef[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
     return ${ $deflate->( $_, $constraint->type_parameter ) };
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
         '$value = do {',
@@ -161,8 +154,7 @@ inflate 'ScalarRef[]', via {
     my ( $attr, $constraint, $inflate ) = @_;
     return \$inflate->( $_, $constraint->type_parameter );
 }, inline {
-    my $constraint = shift;
-    my ( $attr, $deflators ) = @_;
+    my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
     return join( "\n",
         '$value = do {',
