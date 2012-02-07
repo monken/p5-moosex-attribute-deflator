@@ -44,7 +44,7 @@ sub _inline_deflator {
             };
             $inline->( $self, $tc, $find_sub );
             }
-            : $slot_access;
+            : '$value';
         my @code = ('sub {');
         if ( $type eq 'deflator' ) {
             push( @code,
@@ -79,8 +79,7 @@ sub _inline_deflator {
 
 sub deflate {
     my ( $self, $obj, $value, $constraint, @rest ) = @_;
-    $value ||= $self->get_value($obj)
-        if ( $self->has_value($obj) || $self->is_required );
+    $value = $self->get_value($obj) unless(defined $value);
     return undef unless ( defined $value );
     $constraint ||= $self->type_constraint;
     return $value unless ($constraint);
