@@ -51,9 +51,7 @@ sub _inline_deflator {
                 'my $value = $_[2];',
                 'unless(defined $value) {',
                 @check_lazy,
-                $self->is_required
-                ? ""
-                : "return undef unless($has_value);",
+                "return undef unless($has_value);",
                 '$value = ' . $slot_access . ';',
                 '}',
             );
