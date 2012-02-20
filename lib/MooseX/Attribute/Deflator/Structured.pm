@@ -9,8 +9,7 @@ deflate 'MooseX::Types::Structured::Optional[]', via {
     return $deflate->( $_, $constraint->type_parameter );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return $parameter;
+    return $deflators->( $constraint->type_parameter );
 };
 
 inflate 'MooseX::Types::Structured::Optional[]', via {
@@ -18,8 +17,7 @@ inflate 'MooseX::Types::Structured::Optional[]', via {
     return $inflate->( $_, $constraint->type_parameter );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return $parameter;
+    return $deflators->( $constraint->type_parameter );
 };
 
 deflate 'MooseX::Types::Structured::Map[]', via {
@@ -32,19 +30,17 @@ deflate 'MooseX::Types::Structured::Map[]', via {
     return $deflate->( $value, $constraint->parent );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent    = $deflators->( $constraint->parent );
-    my $parameter = $deflators->( $constraint->type_constraints->[1] );
-    return join( "\n",
+    return (
         '$value = {%$value};',
         'while ( my ( $k, $v ) = each %$value ) {',
         '$value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_constraints->[1] ),
         '    };',
         '  };',
         '}',
-        $parent,
+        $deflators->( $constraint->parent ),
     );
 };
 
@@ -58,18 +54,15 @@ inflate 'MooseX::Types::Structured::Map[]', via {
     return $value;
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent = $deflators->( $constraint->parent );
-    my $parameter
-        = $deflators->( $constraint->type_constraints->[1] );
-    return join( "\n",
+    return (
         '$value = do {',
-        $parent,
+        $deflators->( $constraint->parent ),
         ' };',
         'while ( my ( $k, $v ) = each %$value ) {',
         '  $value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_constraints->[1] ),
         '    };',
         '  };',
         '}',
@@ -87,7 +80,6 @@ deflate 'MooseX::Types::Structured::Dict[]', via {
     return $deflate->( $value, $constraint->parent );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent      = $deflators->( $constraint->parent );
     my %constraints = @{ $constraint->type_constraints };
     my @map         = 'my $dict;';
     while ( my ( $k, $v ) = each %constraints ) {
@@ -96,7 +88,7 @@ deflate 'MooseX::Types::Structured::Dict[]', via {
             'my $value = shift;',
             $deflators->($v), ' };' );
     }
-    return join( "\n",
+    return (
         @map,
         '$value = {%$value};',
         'while ( my ( $k, $v ) = each %$value ) {',
@@ -105,7 +97,7 @@ deflate 'MooseX::Types::Structured::Dict[]', via {
         '    $value = $dict->{$k}->($value);',
         '  };',
         '}',
-        $parent,
+        $deflators->( $constraint->parent ),
     );
 };
 
@@ -119,7 +111,6 @@ inflate 'MooseX::Types::Structured::Dict[]', via {
     return $value;
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent      = $deflators->( $constraint->parent );
     my %constraints = @{ $constraint->type_constraints };
     my @map         = 'my $dict;';
     while ( my ( $k, $v ) = each %constraints ) {
@@ -128,10 +119,10 @@ inflate 'MooseX::Types::Structured::Dict[]', via {
             'my $value = shift;',
             $deflators->($v), ' };' );
     }
-    return join( "\n",
+    return (
         @map,
         '$value = do {',
-        $parent,
+        $deflators->( $constraint->parent ),
         ' };',
         'while ( my ( $k, $v ) = each %$value ) {',
         '$value->{$k} = do {',
@@ -141,7 +132,7 @@ inflate 'MooseX::Types::Structured::Dict[]', via {
         '}',
         '$value',
     );
-};;
+};
 
 deflate 'MooseX::Types::Structured::Tuple[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
@@ -154,7 +145,6 @@ deflate 'MooseX::Types::Structured::Tuple[]', via {
     return $deflate->( $value, $constraint->parent );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent      = $deflators->( $constraint->parent );
     my @constraints = @{ $constraint->type_constraints };
     my @map         = 'my $tuple = [];';
     foreach my $tc (@constraints) {
@@ -163,7 +153,7 @@ deflate 'MooseX::Types::Structured::Tuple[]', via {
             'my $value = shift;',
             $deflators->($tc), ' });' );
     }
-    return join( "\n",
+    return (
         @map,
         '$value = [@$value];',
         'for ( my $i = 0; $i < @$value; $i++ ) {',
@@ -172,7 +162,7 @@ deflate 'MooseX::Types::Structured::Tuple[]', via {
         '    $value = ($tuple->[$i] || $tuple->[-1])->($value);',
         '  };',
         '}',
-        $parent,
+        $deflators->( $constraint->parent ),
     );
 };
 
@@ -187,7 +177,6 @@ inflate 'MooseX::Types::Structured::Tuple[]', via {
     return $value;
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent      = $deflators->( $constraint->parent );
     my @constraints = @{ $constraint->type_constraints };
     my @map         = 'my $tuple = [];';
     foreach my $tc (@constraints) {
@@ -196,10 +185,10 @@ inflate 'MooseX::Types::Structured::Tuple[]', via {
             'my $value = shift;',
             $deflators->($tc), ' });' );
     }
-    return join( "\n",
+    return (
         @map,
         '$value = do {',
-        $parent,
+        $deflators->( $constraint->parent ),
         ' };',
         'for ( my $i = 0; $i < @$value; $i++ ) {',
         '$value->[$i] = do {',

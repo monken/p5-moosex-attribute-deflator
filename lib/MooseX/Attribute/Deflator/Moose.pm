@@ -30,19 +30,17 @@ deflate 'HashRef[]', via {
     return $deflate->( $value, $constraint->parent );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent    = $deflators->( $constraint->parent );
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
+    return (
         '$value = {%$value};',
         'while ( my ( $k, $v ) = each %$value ) {',
         '$value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_parameter ),
         '    };',
         '  };',
         '}',
-        $parent,
+        $deflators->( $constraint->parent ),
     );
 };
 
@@ -56,17 +54,15 @@ inflate 'HashRef[]', via {
     return $value;
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent    = $deflators->( $constraint->parent );
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
+    return (
         '$value = do {',
-        $parent,
+        $deflators->( $constraint->parent ),
         ' };',
         'while ( my ( $k, $v ) = each %$value ) {',
         '  $value->{$k} = do {',
         '    my $value = $value->{$k};',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_parameter ),
         '    };',
         '  };',
         '}',
@@ -81,19 +77,17 @@ deflate 'ArrayRef[]', via {
     return $deflate->( $value, $constraint->parent );
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent    = $deflators->( $constraint->parent );
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
+    return (
         '$value = [@$value];',
         'for( @$value ) {',
         '  $_ = do {',
         '    my $value = $_;',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_parameter ),
         '    };',
         '  };',
         '}',
-        $parent,
+        $deflators->( $constraint->parent ),
     );
 };
 
@@ -104,17 +98,15 @@ inflate 'ArrayRef[]', via {
     return $value;
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
-    my $parent    = $deflators->( $constraint->parent );
-    my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
+    return (
         '$value = do {',
-        $parent,
+        $deflators->( $constraint->parent ),
         ' };',
         'for( @$value ) {',
         '  $_ = do {',
         '    my $value = $_;',
         '    $value = do {',
-        $parameter,
+        $deflators->( $constraint->type_parameter ),
         '    };',
         '  };',
         '}',
@@ -144,7 +136,7 @@ deflate 'ScalarRef[]', via {
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n", '$value = do {', $parameter, '};', '$$value' );
+    return ( '$value = do {', $parameter, '};', '$$value' );
 };
 
 inflate 'ScalarRef[]', via {
@@ -153,7 +145,7 @@ inflate 'ScalarRef[]', via {
 }, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n", '$value = do {', $parameter, '};', '\$value' );
+    return ( '$value = do {', $parameter, '};', '\$value' );
 };
 
 1;
