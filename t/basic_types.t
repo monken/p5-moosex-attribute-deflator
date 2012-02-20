@@ -65,7 +65,7 @@ has no_type => ( is => 'rw', traits => ['Deflator'], default => 'no_type' );
 has not_inlined => (
     is      => 'ro',
     isa     => 'ArrayRef[Moose::Object]',
-    default => sub { [ $mo ] },
+    default => sub { [$mo] },
     traits  => ['Deflator'],
 );
 
@@ -74,7 +74,6 @@ use strict;
 use warnings;
 use Test::More;
 
-my $obj     = Test->new;
 my $results = {
     hashref          => '{"foo":"bar"}',
     hashrefarray     => '{"foo":"[\"{\\\\\"foo\\\\\":\\\\\"bar\\\\\"}\"]"}',
@@ -89,12 +88,18 @@ my $results = {
 };
 
 for ( 1 .. 2 ) {
+    my $obj = Test->new;
     foreach my $attr ( Test->meta->get_all_attributes ) {
-        ok($attr, "work on attribute " . $attr->name);
+        ok( $attr,                   "work on attribute " . $attr->name );
+        ok( !$attr->has_value($obj), 'attribute has no value' )
+            if ( $attr->name eq 'hashref' );
         is( $attr->deflate($obj),
             $results->{ $attr->name },
             "result is $results->{$attr->name}"
         );
+
+        ok( $attr->has_value($obj), 'deflate sets object value' )
+            if ( $attr->name eq 'hashref' );
 
         is_deeply(
             $attr->inflate( $obj, $results->{ $attr->name } ),
