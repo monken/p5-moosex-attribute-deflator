@@ -1,6 +1,6 @@
 package MooseX::Attribute::LazyInflator;
 
-# ABSTRACT: Deflates and inflates Moose attributes to and from a string
+# ABSTRACT: Lazy inflate attributes on access for better performance
 
 use Moose();
 use MooseX::Attribute::Deflator ();
