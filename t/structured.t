@@ -56,7 +56,6 @@ package main;
 
 use JSON;
 use DateTime;
-use Test::Exception;
 
 my $now = DateTime->now;
 

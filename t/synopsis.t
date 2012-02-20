@@ -28,7 +28,7 @@ has hash => (
 
 package main;
 
-use Test::Most;
+use Test::More;
 
 my $obj = Test->new;
 
@@ -71,7 +71,8 @@ for ( 1 .. 2 ) {
     is_deeply( $obj->hash, { foo => 'bar' } );
 
     $obj = LazyInflator->new( hash => '[1,2,3]' );
-    throws_ok { $obj->hash } qr/constraint/, 'throws on wrong type';
+    eval { $obj->hash };
+    like($@, qr/constraint/, 'throws on wrong type');
 
     LazyInflator->meta->make_immutable;
 }

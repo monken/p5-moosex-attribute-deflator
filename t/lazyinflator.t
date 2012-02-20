@@ -20,7 +20,6 @@ has bool => ( is => 'rw', isa => 'Bool', traits => [qw(LazyInflator)] );
 package main;
 
 use JSON;
-use Test::Exception;
 
 for(1..2) {
     my $t = Test->new( hash => q({"foo":"bar"}), bool => \1 );

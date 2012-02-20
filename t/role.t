@@ -40,7 +40,6 @@ with 'MyRole', 'MyEmptyRole';
 package main;
 
 use JSON;
-use Test::Exception;
 
 for(0..5) {
     my $class = "Test" . ( $_ % 3 + 1 );
