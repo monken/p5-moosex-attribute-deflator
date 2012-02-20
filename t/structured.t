@@ -16,9 +16,9 @@ use MooseX::Attribute::Deflator::Structured;
 use MooseX::Attribute::Deflator::Moose;
 
 use MooseX::Attribute::Deflator;
-deflate 'DateTime', via { $_->epoch }, inline {'$value->epoch'};
+deflate 'DateTime', via { $_->epoch }, inline_as {'$value->epoch'};
 inflate 'DateTime', via { DateTime->from_epoch( epoch => $_ ) },
-    inline {'DateTime->from_epoch( epoch => $value )'};
+    inline_as {'DateTime->from_epoch( epoch => $value )'};
 no MooseX::Attribute::Deflator;
 
 class_type 'DateTime';

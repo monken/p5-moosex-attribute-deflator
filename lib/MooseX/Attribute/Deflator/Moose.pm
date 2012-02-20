@@ -6,19 +6,19 @@ use MooseX::Attribute::Deflator;
 use JSON;
 
 deflate [qw(ArrayRef HashRef)], via { JSON::encode_json($_) },
-    inline {'JSON::encode_json($value)'};
+    inline_as {'JSON::encode_json($value)'};
 inflate [qw(ArrayRef HashRef)], via { JSON::decode_json($_) },
-    inline {'JSON::decode_json($value)'};
+    inline_as {'JSON::decode_json($value)'};
 
-deflate 'ScalarRef', via {$$_}, inline {'$$value'};
-inflate 'ScalarRef', via { \$_ }, inline {'\$value'};
+deflate 'ScalarRef', via {$$_}, inline_as {'$$value'};
+inflate 'ScalarRef', via { \$_ }, inline_as {'\$value'};
 
 deflate 'Bool', via { $_ ? JSON::XS::true : JSON::XS::false },
-    inline {'$value ? JSON::XS::true : JSON::XS::false'};
-inflate 'Bool', via { $_ ? 1 : 0 }, inline {'$value ? 1 : 0'};
+    inline_as {'$value ? JSON::XS::true : JSON::XS::false'};
+inflate 'Bool', via { $_ ? 1 : 0 }, inline_as {'$value ? 1 : 0'};
 
-deflate 'Item', via {$_}, inline {'$value'};
-inflate 'Item', via {$_}, inline {'$value'};
+deflate 'Item', via {$_}, inline_as {'$value'};
+inflate 'Item', via {$_}, inline_as {'$value'};
 
 deflate 'HashRef[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
@@ -28,7 +28,7 @@ deflate 'HashRef[]', via {
             = $deflate->( $value->{$k}, $constraint->type_parameter );
     }
     return $deflate->( $value, $constraint->parent );
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
@@ -54,7 +54,7 @@ inflate 'HashRef[]', via {
             = $inflate->( $value->{$k}, $constraint->type_parameter );
     }
     return $value;
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
@@ -79,7 +79,7 @@ deflate 'ArrayRef[]', via {
     my $value = [@$_];
     $_ = $deflate->( $_, $constraint->type_parameter ) for (@$value);
     return $deflate->( $value, $constraint->parent );
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
@@ -102,7 +102,7 @@ inflate 'ArrayRef[]', via {
     my $value = $inflate->( $_, $constraint->parent );
     $_ = $inflate->( $_, $constraint->type_parameter ) for (@$value);
     return $value;
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parent    = $deflators->( $constraint->parent );
     my $parameter = $deflators->( $constraint->type_parameter );
@@ -125,7 +125,7 @@ inflate 'ArrayRef[]', via {
 deflate 'Maybe[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
     return $deflate->( $_, $constraint->type_parameter );
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     return $deflators->( $constraint->type_parameter );
 };
@@ -133,7 +133,7 @@ deflate 'Maybe[]', via {
 inflate 'Maybe[]', via {
     my ( $attr, $constraint, $inflate ) = @_;
     return $inflate->( $_, $constraint->type_parameter );
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     return $deflators->( $constraint->type_parameter );
 };
@@ -141,25 +141,19 @@ inflate 'Maybe[]', via {
 deflate 'ScalarRef[]', via {
     my ( $attr, $constraint, $deflate ) = @_;
     return ${ $deflate->( $_, $constraint->type_parameter ) };
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
-        '$value = do {',
-        $parameter,
-        '};', '$$value' );
+    return join( "\n", '$value = do {', $parameter, '};', '$$value' );
 };
 
 inflate 'ScalarRef[]', via {
     my ( $attr, $constraint, $inflate ) = @_;
     return \$inflate->( $_, $constraint->type_parameter );
-}, inline {
+}, inline_as {
     my ( $attr, $constraint, $deflators ) = @_;
     my $parameter = $deflators->( $constraint->type_parameter );
-    return join( "\n",
-        '$value = do {',
-        $parameter,
-        '};', '\$value' );
+    return join( "\n", '$value = do {', $parameter, '};', '\$value' );
 };
 
 1;

@@ -8,6 +8,7 @@
     type. See the diff for ::Moose and ::Structured.
   - ::Moose now comes with a deflator and inflator for Bool types.
   - $attr->is_inflated is now inlined for better performance
+  - renamed inline {} to inline_as {}
 
 2.1.9-TRIAL - 2012-01-20
   - inline deflators and inflators
@@ -17,7 +18,7 @@
   - fixed structured.t to work with latest moose
 
 2.1.7 - 2011-07-28
-  - perfomance improvement by removing redundant call to is_inflated (thanks timbunce)
+  - performance improvement by removing redundant call to is_inflated (thanks timbunce)
 
 2.1.6 - 2011-06-20
   - readded support for Moose 1.25
@@ -46,7 +47,7 @@
 2.0.1 - 2011-03-17
   - deflate/inflate return now the value of the attribute
     even if no deflator/inflator could be found
-  - has_deflator/inflator now work correctly with typed contraints
+  - has_deflator/inflator now work correctly with typed constraints
 
 2.0.0
   - Moose 2.0 compliant

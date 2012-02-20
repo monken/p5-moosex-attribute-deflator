@@ -9,10 +9,10 @@ use MooseX::Attribute::Deflator::Registry;
 use Moose::Util qw();
 
 sub via (&)    { $_[0] }
-sub inline (&) { $_[0] }
+sub inline_as (&) { $_[0] }
 
 Moose::Exporter->setup_import_methods(
-    as_is => [ qw( deflate inflate via inline ) ], );
+    as_is => [ qw( deflate inflate via inline_as ) ], );
 
 my $REGISTRY = MooseX::Attribute::Deflator::Registry->new;
 
@@ -30,8 +30,8 @@ sub inflate {
     $REGISTRY->add_inflator( $_, @_ ) for (@$types);
 }
 
-deflate 'Item', via {$_}, inline {'$value'};
-inflate 'Item', via {$_}, inline {'$value'};
+deflate 'Item', via {$_}, inline_as {'$value'};
+inflate 'Item', via {$_}, inline_as {'$value'};
 
 Moose::Util::_create_alias( 'Attribute', 'Deflator', 1,
     'MooseX::Attribute::Deflator::Meta::Role::Attribute' );
@@ -51,10 +51,10 @@ __END__
 
  deflate 'DateTime',
     via { $_->epoch },
-    inline { '$value->epoch' }; # optional
+    inline_as { '$value->epoch' }; # optional
  inflate 'DateTime',
     via { DateTime->from_epoch( epoch => $_ ) },
-    inline { 'DateTime->from_epoch( epoch => $value )' }; # optional
+    inline_as { 'DateTime->from_epoch( epoch => $value )' }; # optional
 
  no MooseX::Attribute::Deflator;
 
@@ -131,11 +131,11 @@ B<< Inlining works in Moose >= 1.9 only. >>
 
  deflate 'DateTime',
     via { $_->epoch },
-    inline { '$value->epoch' }; # optional
+    inline_as { '$value->epoch' }; # optional
 
  inflate 'DateTime',
     via { DateTime->from_epoch( epoch => $_ ) },
-    inline { 'DateTime->from_epoch( epoch => $value )' }; # optional
+    inline_as { 'DateTime->from_epoch( epoch => $value )' }; # optional
     
 Defines a deflator or inflator for a given type constraint. This can also be
 a type constraint defined via L<MooseX::Types> and parameterized types.
