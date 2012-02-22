@@ -1,4 +1,7 @@
-2.1.10-TRIAL - 2012-01-21
+2.1.11-TRIAL - 2012-02-22
+  - use JSON instead of JSON::XS directly
+
+2.1.10-TRIAL - 2012-02-21
   - improve ::Registry code, find_deflator returns inlined deflators if it exists
   - call deflators with the type constraint it is defined for,
     i.e. given a deflator that is defined for HashRef[] and a TC MyType that is

@@ -13,8 +13,8 @@ inflate [qw(ArrayRef HashRef)], via { JSON::decode_json($_) },
 deflate 'ScalarRef', via {$$_}, inline_as {'$$value'};
 inflate 'ScalarRef', via { \$_ }, inline_as {'\$value'};
 
-deflate 'Bool', via { $_ ? JSON::XS::true : JSON::XS::false },
-    inline_as {'$value ? JSON::XS::true : JSON::XS::false'};
+deflate 'Bool', via { $_ ? JSON::true : JSON::false },
+    inline_as {'$value ? JSON::true : JSON::false'};
 inflate 'Bool', via { $_ ? 1 : 0 }, inline_as {'$value ? 1 : 0'};
 
 deflate 'Item', via {$_}, inline_as {'$value'};

@@ -17,7 +17,7 @@ has hashref => (
 package main;
 use strict;
 use warnings;
-use JSON::XS;
+use JSON;
 use Benchmark qw(:all);
 
 my $obj     = MyBenchmark->new;
@@ -28,11 +28,11 @@ cmpthese(1_000_000, {
         $attr->deflate($obj);
     },
     get_value => sub {
-        JSON::XS::encode_json($attr->get_value($obj, 'hashref'));
+        JSON::encode_json($attr->get_value($obj, 'hashref'));
     },
     accessor => sub {
         my $value = $_[0];
         $value = $obj->hashref unless(defined $value);
-        JSON::XS::encode_json($value);
+        JSON::encode_json($value);
     }
 });
