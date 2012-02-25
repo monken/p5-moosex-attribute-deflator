@@ -53,7 +53,8 @@ after install_accessors => sub {
     my @code
         = $self->_inline_instance_is_inflated( '$_[1]', '$type_constraint',
         '$type_coercion', '$value', );
-    $self->meta->add_method(
+    my $role = Moose::Meta::Role->create_anon_role;
+    $role->add_method(
         'is_inflated' => eval_closure(
             environment => $self->_eval_environment,
             source      => join( "\n",
@@ -67,6 +68,7 @@ after install_accessors => sub {
                 '}' ),
         )
     );
+    Moose::Util::apply_all_roles($self, $role);
 } if ( $Moose::VERSION >= 1.9 );
 
 if ( Moose->VERSION < 1.9900 ) {

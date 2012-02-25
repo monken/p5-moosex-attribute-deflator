@@ -30,6 +30,7 @@ for(1..2) {
         ok($attr->has_value($t), 'Attribute has value');
         is($attr->get_raw_value($t), q({"foo":"bar"}), 'Raw value is raw');
         is_deeply($attr->get_value($t), { foo => 'bar' }, 'Value has been inflated');
+        ok($attr->is_inflated($t), 'Attribute is_inflated');
         is_deeply($attr->get_value($t), { foo => 'bar' }, 'Value has not been inflated again');
 
         $t = Test->new( hash => q({"foo":"bar"}) );
