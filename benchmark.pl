@@ -20,19 +20,25 @@ use warnings;
 use JSON;
 use Benchmark qw(:all);
 
-my $obj     = MyBenchmark->new;
+my $obj  = MyBenchmark->new;
 my $attr = $obj->meta->get_attribute('hashref');
 
-cmpthese(1_000_000, {
-    deflate => sub {
-        $attr->deflate($obj);
-    },
-    get_value => sub {
-        JSON::encode_json($attr->get_value($obj, 'hashref'));
-    },
-    accessor => sub {
-        my $value = $_[0];
-        $value = $obj->hashref unless(defined $value);
-        JSON::encode_json($value);
+cmpthese(
+    1_000_000,
+    {   deflate => sub {
+            $attr->deflate($obj);
+        },
+        get_value => sub {
+            JSON::encode_json( $attr->get_value( $obj, 'hashref' ) );
+        },
+        accessor => sub {
+            my $value = $_[0];
+            $value = $obj->hashref unless ( defined $value );
+            local $@;
+            my $deflated = eval { JSON::encode_json($value) };
+            if ($@) { die "foo" }
+            return $deflated;
+            }
     }
-});
+);
+

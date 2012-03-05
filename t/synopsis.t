@@ -26,6 +26,17 @@ has hash => (
     traits  => ['Deflator']
 );
 
+sub deflate {
+   my $self = shift;
+   
+   # you probably want to deflate only those that are required or have a value
+   my @attributes = grep { $_->has_value($self) || $_->is_required }
+                    $self->meta->get_all_attributes;
+   
+   # works only if all attributes have the 'Deflator' trait applied
+   return { map { $_->name => $_->deflate($self) } @attributes };
+}
+
 package main;
 
 use Test::More;
@@ -49,6 +60,14 @@ my $obj = Test->new;
     my $inflated = $attr->inflate( $obj, $deflated );
     is_deeply( $inflated, { foo => 'bar' } )
 }
+
+is_deeply(
+    $obj->deflate,
+    {   hash => $obj->meta->get_attribute('hash')->deflate($obj),
+        now  => $obj->meta->get_attribute('now')->deflate($obj),
+    },
+    'deflate object method works as well'
+);
 
 package LazyInflator;
 

@@ -214,6 +214,28 @@ L<MooseX::Attribute::Deflator::Moose> and L<MooseX::Attribute::Deflator::Structu
 
 =back
 
+=head1 DEFLATE AN OBJECT INSTANCE
+
+Usually, you want to deflate certain attributes of a class, but this module only
+works on a per attribute basis. In order to deflate an instance with all of its
+attributes, you can use the following code:
+
+ sub deflate {
+    my $self = shift;
+    
+    # you probably want to deflate only those that are required or have a value
+    my @attributes = grep { $_->has_value($self) || $_->is_required }
+                     $self->meta->get_all_attributes;
+    
+    # works only if all attributes have the 'Deflator' trait applied
+    return { map { $_->name => $_->deflate($self) } @attributes };
+ }
+
+If you are using L<MooseX::Attribute::LazyInflator>,
+throw in a call to L<MooseX::Attribute::LazyInflator::Meta::Role::Attribute/is_inflated>
+to make sure that you don't deflate an already deflated attribute. Instead, you can just
+use L<Moose::Meta::Attribute/get_raw_value> to get the deflated value.
+
 =head1 PERFORMANCE
 
 The overhead for having custom deflators or inflators per attribute is minimal.

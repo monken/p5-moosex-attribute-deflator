@@ -38,6 +38,7 @@ sub is_inflated {
             = defined $from_constructor
             ? $from_constructor
             : $self->get_raw_value($instance);
+        return 1 if(!defined $value && $self->is_required);
         $value = $self->type_constraint->coerce($value)
             if ( $self->should_coerce
             && $self->type_constraint->has_coercion );
@@ -85,7 +86,7 @@ sub _inline_instance_is_inflated {
             . '->{_inflated_attributes}->{"'
             . quotemeta( $self->name )
             . '"}' );
-    return @code if ( !$self->has_type_constraint );    # TODO return 1 ?
+    return 1 if ( !$self->has_type_constraint );    # TODO return 1 ?
     $value ||= $self->_inline_instance_get($instance);
     my $coerce
         = $self->should_coerce && $self->type_constraint->has_coercion
