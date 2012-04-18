@@ -47,7 +47,6 @@ sub _inline_deflator {
             }
             : '$value';
         @deflator = (
-            'local $@;',
             'my $deflated = eval {',
             @deflator,
             '};',

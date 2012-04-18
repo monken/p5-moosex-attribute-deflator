@@ -1,3 +1,6 @@
+2.2.1 - 2012-04-18
+  - fixed test on perl < 5.14
+
 2.2.0 - 2012-04-17
   - better error reports on failed deflation/inflation
 
