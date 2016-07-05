@@ -1,4 +1,5 @@
 package MooseX::Attribute::LazyInflator::Meta::Role::ApplicationToClass;
+
 use Moose::Role;
 use MooseX::Attribute::LazyInflator::Role::Class;
 

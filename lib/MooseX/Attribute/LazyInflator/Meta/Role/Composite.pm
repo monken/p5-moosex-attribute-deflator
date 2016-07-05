@@ -1,4 +1,5 @@
 package MooseX::Attribute::LazyInflator::Meta::Role::Composite;
+
 use Moose::Role;
 
 around apply_params => sub {
